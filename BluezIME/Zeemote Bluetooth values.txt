@@ -1,0 +1,21 @@
+Button press:
+0x08 a1 07 xx xx xx xx xx xx
+
+0x08 = number of bytes following
+0xA107 = keypress event
+
+remaning 6 buttons are placeholders for pressed
+keys. 0xFE means no key, other value indicates that
+a key is pressed
+
+xx: 00 = a, 01 = b, 02 = c, 03 = d, 0xFE = none
+
+
+Joystick move:
+0x05 a1 08 00 xx yy
+
+xx = 0x7f = right, 0x80 = left
+yy = 0x7f = down, 0x80 = up
+
+left/down goes from 0x00 to 0x7f
+right/up goes from 0x7f to 0x80

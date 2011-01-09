@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    
+    <string name="app_name">Bluez IME</string>
+<string name="error_message_generic" formatted="false">Error: %s</string>
+<string name="connected_to_device_message" formatted="false">Connected to %s</string>
+<string name="disconnected_from_device_message" formatted="false">Disconnected from %s</string>
+<string name="bluetooth_state_on">Bluetooth is ON</string>
+<string name="bluetooth_state_off">Bluetooth is OFF</string>
+<string name="bluetooth_state_turning_on">Bluetooth is turning on ...</string>
+<string name="bluetooth_state_turning_off">Bluetooth is turning off ...</string>
+<string name="bluetooth_unsupported">Bluetooth is not supported on this device</string>
+
+<string name="bluetooth_scan_menu">Scan ...</string>
+<string name="bluetooth_no_device">No device selected</string>
+<string name="invalid_driver" formatted="false">The supplied driver is invalid: %s</string>
+
+<string-array name="driver_displaynames"><item>Zeemote JS1</item>
+<item>Data dump driver</item>
+</string-array>
+<string name="devicelist_scanfordevices">Scan for devices</string>
+<string name="devicelist_scanningfordevices">Scanning for devices ...</string>
+<string name="devicelist_paireddevices">Paired devices</string>
+<string name="devicelist_founddevices">Found devices</string>
+<string name="preferencelist_header1">1. Select the device to use</string>
+<string name="preferencelist_header2">2. Set device as IME</string>
+<string name="preferencelist_header3">3. Advanced settings</string>
+<string name="preferencelist_activateitem">Activate Bluetooth</string>
+<string name="preferencelist_selectdevice">Select device</string>
+<string name="preferencelist_selectdriver">Select device driver</string>
+<string name="preferencelist_selectimehint">Press here to select the Bluez IME</string>
+<string name="preferencelist_selectimetext">Select IME</string>
+
+<string name="preference_help_short">Help / Donate / More</string>
+<string name="preference_help_long">Click here to open the project page - http://code.google.com/p/android-bluez-ime</string>
+
+</resources>
