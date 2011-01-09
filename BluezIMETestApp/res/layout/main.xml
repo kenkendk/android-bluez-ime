@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="fill_parent"
+	android:layout_height="fill_parent">
+
+	<Button android:id="@+id/ConnectButton" android:text="@string/button_initial_text"
+		android:layout_weight="0" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:padding="10dp" />
+
+	<LinearLayout android:id="@+id/ButtonIndicators1"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="0">
+		<TextView android:id="@+id/ButtonLabelA" android:text="A"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0" android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonA" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+		<TextView android:id="@+id/ButtonLabelB" android:text="B"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0"  android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonB" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+		<TextView android:id="@+id/ButtonLabelC" android:text="C"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0"  android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonC" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+	</LinearLayout>
+	<LinearLayout android:id="@+id/ButtonIndicators2"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="0">
+
+		<TextView android:id="@+id/ButtonLabelX" android:text="X"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0"  android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonX" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+		<TextView android:id="@+id/ButtonLabelY" android:text="Y"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0"  android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonY" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+		<TextView android:id="@+id/ButtonLabelZ" android:text="Z"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0"  android:paddingRight="5dp"/>
+		<CheckBox android:id="@+id/ButtonZ" android:layout_height="wrap_content"
+			android:layout_width="wrap_content" android:layout_weight="0" />
+	</LinearLayout>
+	<LinearLayout android:id="@+id/ButtonIndicators2"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="0">
+		<TextView android:id="@+id/AxisLabelX" android:text="X"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0" android:paddingRight="10dp" />
+		<SeekBar android:id="@+id/AxisX" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:layout_weight="0"
+			android:max="256" android:progress="127" android:paddingRight="5dp"></SeekBar>
+	</LinearLayout>
+	<LinearLayout android:id="@+id/ButtonIndicators2"
+		android:orientation="horizontal" android:layout_width="fill_parent"
+		android:layout_height="wrap_content" android:layout_weight="0">
+		<TextView android:id="@+id/AxisLabelY" android:text="Y"
+			android:layout_height="wrap_content" android:layout_width="wrap_content"
+			android:layout_weight="0" android:paddingRight="10dp" />
+		<SeekBar android:id="@+id/AxisY" android:layout_width="fill_parent"
+			android:layout_height="wrap_content" android:layout_weight="0"
+			android:max="256" android:progress="127" android:paddingRight="5dp"></SeekBar>
+	</LinearLayout>
+	
+	<TextView android:id="@+id/LogLabel" android:text="Log data"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:layout_weight="0" android:paddingTop="10dp" />
+
+	<ListView android:id="@+id/LogView"
+		android:layout_height="wrap_content" android:layout_width="fill_parent"
+		android:layout_weight="0" />
+	
+</LinearLayout>
