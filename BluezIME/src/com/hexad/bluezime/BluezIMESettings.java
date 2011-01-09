@@ -71,7 +71,6 @@ public class BluezIMESettings extends PreferenceActivity {
         	AlertDialog dlg = new AlertDialog.Builder(this).create();
         	dlg.setMessage(this.getString(R.string.bluetooth_unsupported));
         	dlg.show();
-        	finish();
         }
         else
         {

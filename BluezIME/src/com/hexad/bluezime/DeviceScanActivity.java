@@ -59,7 +59,7 @@ public class DeviceScanActivity extends Activity {
 		{
 			AlertDialog dlg =  new AlertDialog.Builder(this).create();
 			dlg.setMessage("No bluetooth device found");
-			this.finish();
+			dlg.show();
 			return;
 		}
 		
