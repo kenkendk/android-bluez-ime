@@ -39,6 +39,8 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
 			if (blue == null)
 				throw new Exception(m_context.getString(R.string.bluetooth_unsupported));
+			if (!blue.isEnabled())
+				throw new Exception(m_context.getString(R.string.error_bluetooth_off));
 			
 			blue.cancelDiscovery();
 			

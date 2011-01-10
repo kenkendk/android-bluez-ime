@@ -53,7 +53,7 @@ public class BluezIMESettings extends PreferenceActivity {
 			public boolean onPreferenceClick(Preference preference) {
 				String url;
 				try {
-					url = "http://code.google.com/p/android-bluez-ime";
+					url = "http://code.google.com/p/android-bluez-ime/";
 					Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
 				    startActivity( browse );			
 				} catch (Exception e) {

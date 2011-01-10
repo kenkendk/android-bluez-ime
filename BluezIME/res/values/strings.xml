@@ -24,7 +24,7 @@
 <string name="devicelist_founddevices">Found devices</string>
 <string name="preferencelist_header1">1. Select the device to use</string>
 <string name="preferencelist_header2">2. Set device as IME</string>
-<string name="preferencelist_header3">3. Advanced settings</string>
+<string name="preferencelist_header3">3. More</string>
 <string name="preferencelist_activateitem">Activate Bluetooth</string>
 <string name="preferencelist_selectdevice">Select device</string>
 <string name="preferencelist_selectdriver">Select device driver</string>
@@ -32,6 +32,9 @@
 <string name="preferencelist_selectimetext">Select IME</string>
 
 <string name="preference_help_short">Help / Donate / More</string>
-<string name="preference_help_long">Click here to open the project page - http://code.google.com/p/android-bluez-ime</string>
+<string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>
+<string name="error_bluetooth_off">Bluetooth is currently turned off</string>
 
+<string name="settings_title">Bluez IME Settings</string>
+<string name="scan_title">Bluez IME Device Selection</string>
 </resources>

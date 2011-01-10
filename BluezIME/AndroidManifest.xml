@@ -26,9 +26,9 @@
         <meta-data android:name="android.view.im" android:resource="@xml/method" />
     </service>
 
-	<activity android:name="DeviceScanActivity" />
+	<activity android:name="DeviceScanActivity" android:label="@string/scan_title" />
 
-    <activity android:name="BluezIMESettings" android:label="Bluez IME Settings">
+    <activity android:name="BluezIMESettings" android:label="@string/settings_title">
 	    <intent-filter>
 	        <action android:name="android.intent.action.MAIN"/>
 	        <category android:name="android.intent.category.LAUNCHER" />

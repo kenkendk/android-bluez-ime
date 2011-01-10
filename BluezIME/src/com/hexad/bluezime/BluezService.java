@@ -148,10 +148,8 @@ public class BluezService extends IntentService {
 			if (blue == null)
 				throw new Exception(this.getString(R.string.bluetooth_unsupported));
 
-			if (!blue.isEnabled()) {
-				startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
-				Thread.sleep(1000); //TODO: Not the nicest way to do this
-			}
+			if (!blue.isEnabled())
+				throw new Exception(this.getString(R.string.error_bluetooth_off));
 			
 			if (driver.toLowerCase().equals("zeemote"))
 				m_reader = new ZeemoteReader(address, getApplicationContext());
