@@ -67,7 +67,16 @@ public class BluezIMESettings extends PreferenceActivity {
         if (blue == null)
         {
         	m_bluetoothActivity.setEnabled(false);
-        	m_bluetoothActivity.setSummary("Bluetooth is not supported");
+        	m_bluetoothActivity.setSummary(R.string.bluetooth_unsupported);
+        	bluetoothStateMonitor = null;
+        	
+        	CharSequence[] entries = new CharSequence[0];
+        	m_pairedDevices.setEntries(entries);
+        	m_pairedDevices.setEntryValues(entries);
+        	
+        	m_pairedDevices.setEnabled(false);
+        	m_drivers.setEnabled(false);
+        	
         	AlertDialog dlg = new AlertDialog.Builder(this).create();
         	dlg.setMessage(this.getString(R.string.bluetooth_unsupported));
         	dlg.show();
@@ -153,7 +162,8 @@ public class BluezIMESettings extends PreferenceActivity {
 	protected void onDestroy() {
     	super.onDestroy();
     	
-    	unregisterReceiver(bluetoothStateMonitor);
+    	if (bluetoothStateMonitor != null)
+    		unregisterReceiver(bluetoothStateMonitor);
     	unregisterReceiver(preferenceUpdateMonitor);
     }
     
