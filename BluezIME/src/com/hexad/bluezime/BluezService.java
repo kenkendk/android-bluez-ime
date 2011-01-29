@@ -11,6 +11,7 @@ public class BluezService extends IntentService {
 	
 	public static final String[] DRIVER_NAMES = {"zeemote", "dump"};
 	public static final String[] DRIVER_DISPLAYNAMES = {"Zeemote JS1", "Data dump driver" };
+	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
 	
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
 	public static final String EVENT_KEYPRESS_KEY = "key";
@@ -19,6 +20,9 @@ public class BluezService extends IntentService {
 	public static final String EVENT_DIRECTIONALCHANGE = "com.hexad.bluezime.directionalchange";
 	public static final String EVENT_DIRECTIONALCHANGE_DIRECTION = "direction";
 	public static final String EVENT_DIRECTIONALCHANGE_VALUE = "value";
+
+	public static final String EVENT_CONNECTING = "com.hexad.bluezime.connecting";
+	public static final String EVENT_CONNECTING_ADDRESS = "address";
 
 	public static final String EVENT_CONNECTED = "com.hexad.bluezime.connected";
 	public static final String EVENT_CONNECTED_ADDRESS = "address";
@@ -137,7 +141,7 @@ public class BluezService extends IntentService {
 
 			if (m_reader != null)
 			{
-				if (address.equals(m_reader.getDeviceAddress()) && driver.toLowerCase().equals(m_reader.getDriverName()))
+				if (m_reader.isRunning() && address.equals(m_reader.getDeviceAddress()) && driver.toLowerCase().equals(m_reader.getDriverName()))
 					return; //Already connected
 				
 				//Connect to other device, disconnect
@@ -150,7 +154,11 @@ public class BluezService extends IntentService {
 
 			if (!blue.isEnabled())
 				throw new Exception(this.getString(R.string.error_bluetooth_off));
-			
+
+			Intent connectingBroadcast = new Intent(EVENT_CONNECTING);
+			connectingBroadcast.putExtra(EVENT_CONNECTING_ADDRESS, address);
+			sendBroadcast(connectingBroadcast);
+
 			if (driver.toLowerCase().equals("zeemote"))
 				m_reader = new ZeemoteReader(address, getApplicationContext());
 			else if (driver.toLowerCase().equals("dump"))

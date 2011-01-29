@@ -246,14 +246,17 @@ public class BluezIMESettings extends PreferenceActivity {
 		}
 		
 		String driver = m_prefs.getSelectedDriverName();
-		int index = 0;
+		int index = -1;
 		for(int i = 0; i < BluezService.DRIVER_NAMES.length; i++)
 			if (BluezService.DRIVER_NAMES[i].equals(driver)) {
 				index = i;
 				break;
 			}
 
-		m_drivers.setSummary(BluezService.DRIVER_DISPLAYNAMES[index]);
+		if (index < 0 || index >= BluezService.DRIVER_DISPLAYNAMES.length)
+			m_drivers.setSummary(R.string.preference_device_unknown);
+		else
+			m_drivers.setSummary(BluezService.DRIVER_DISPLAYNAMES[index]);
 	}
     
 	private BroadcastReceiver bluetoothStateMonitor = new BroadcastReceiver() {
@@ -265,6 +268,8 @@ public class BluezIMESettings extends PreferenceActivity {
 				m_bluetoothActivity.setChecked(true);
 				m_bluetoothActivity.setEnabled(false);
 				m_bluetoothActivity.setSummary(R.string.bluetooth_state_on);
+				
+				enumerateBondedDevices();
 			}
 			else if (state == BluetoothAdapter.STATE_OFF) {
 				m_bluetoothActivity.setChecked(false);

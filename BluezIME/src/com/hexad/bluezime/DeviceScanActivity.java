@@ -1,10 +1,12 @@
 package com.hexad.bluezime;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,6 +33,7 @@ public class DeviceScanActivity extends Activity {
 	private ListView m_knownDeviceList;
 	private ListView m_foundDeviceList;
 	private LinearLayout m_scanWaitMarker;
+	private TextView m_scanWaitText;
 	private Button m_scanButton;
 	private BluetoothAdapter m_bluetoothAdapter;
 	
@@ -48,11 +51,13 @@ public class DeviceScanActivity extends Activity {
 		m_knownDeviceList = (ListView)findViewById(R.id.PairedDeviceList);
 		m_foundDeviceList = (ListView)findViewById(R.id.FoundDeviceList);
 		m_scanWaitMarker = (LinearLayout)findViewById(R.id.WaitLayoutGroup);
+		m_scanWaitText = (TextView)findViewById(R.id.WaitLabelText);
 		m_scanButton = (Button)findViewById(R.id.ScanButton);
 
 		registerReceiver(discoveryStartedMonitor, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_STARTED));
 		registerReceiver(discoveryFinishedMonitor, new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
 		registerReceiver(deviceFoundMonitor, new IntentFilter(BluetoothDevice.ACTION_FOUND));
+		registerReceiver(deviceBondedMonitor, new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED));
 		
 		m_bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 		if (m_bluetoothAdapter == null)
@@ -122,6 +127,50 @@ public class DeviceScanActivity extends Activity {
 		unregisterReceiver(discoveryStartedMonitor);
 		unregisterReceiver(discoveryFinishedMonitor);
 		unregisterReceiver(deviceFoundMonitor);
+		unregisterReceiver(deviceBondedMonitor);
+	}
+	
+	private class PairByConnectThread extends Thread {
+		
+		private BluetoothDevice m_device;
+		public PairByConnectThread(BluetoothDevice device) {
+			m_device = device;
+		}
+		
+		@Override
+		public void run() {
+			BluetoothSocket socket = null;
+			
+			try {
+	        	Method m = m_device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+		        socket = (BluetoothSocket)m.invoke(m_device, Integer.valueOf(1));
+		        socket.connect();
+			} catch (Exception ex) {
+			} finally {
+				if (socket != null) {
+					try { socket.close(); }
+					catch (Exception ex2) {}
+				}
+				
+				runOnUiThread(new Runnable() {
+					@Override
+					public void run() {
+						m_scanButton.setVisibility(View.VISIBLE);
+						m_scanWaitMarker.setVisibility(View.GONE);
+					}
+				});
+			}
+			
+		}
+	}
+	
+	
+	private void deviceSelected(BluetoothDevice device) {
+        Intent intent = new Intent();
+        intent.putExtra(EXTRA_DEVICE, device);
+
+        setResult(Activity.RESULT_OK, intent);
+        finish();
 	}
 	
     private OnItemClickListener onDeviceClick = new OnItemClickListener() {
@@ -131,11 +180,18 @@ public class DeviceScanActivity extends Activity {
 			BluetoothDevice device = (BluetoothDevice)v.getTag(); 
 			
 			if (device != null) {
-	            Intent intent = new Intent();
-	            intent.putExtra(EXTRA_DEVICE, device);
-	
-	            setResult(Activity.RESULT_OK, intent);
-	            finish();
+				if (device.getBondState() == BluetoothDevice.BOND_NONE) {
+					m_bluetoothAdapter.cancelDiscovery();
+					
+					m_scanWaitText.setText(String.format(getString(R.string.devicelist_pairingwithdevice), device.getAddress()));
+					m_scanButton.setVisibility(View.GONE);
+					m_scanWaitMarker.setVisibility(View.VISIBLE);
+					new PairByConnectThread(device).start();
+				}
+				else
+				{
+					deviceSelected(device);
+				}
 			}
         }
     };
@@ -186,6 +242,7 @@ public class DeviceScanActivity extends Activity {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			m_foundDevices.clear();
+			m_scanWaitText.setText(R.string.devicelist_scanningfordevices);
 			m_scanWaitMarker.setVisibility(View.VISIBLE);
 			m_scanButton.setVisibility(View.GONE);
 		}
@@ -199,11 +256,29 @@ public class DeviceScanActivity extends Activity {
 		}
 	};
 	
+	private BroadcastReceiver deviceBondedMonitor = new BroadcastReceiver() {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			int state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.BOND_NONE);
+			if (state == BluetoothDevice.BOND_BONDED) {
+				deviceSelected((BluetoothDevice)intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE));
+			}
+		}
+	};
+	
 	private BroadcastReceiver deviceFoundMonitor = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction()))
-			m_foundDevices.add((BluetoothDevice)intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE));
+			if (BluetoothDevice.ACTION_FOUND.equals(intent.getAction())) {
+				BluetoothDevice found = (BluetoothDevice)intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+				
+				//Filter duplicates
+				for(BluetoothDevice d : m_foundDevices)
+					if (d.getAddress().equals(found.getAddress()))
+						return;
+				
+				m_foundDevices.add(found);
+			}
 		}
 	};	
 }

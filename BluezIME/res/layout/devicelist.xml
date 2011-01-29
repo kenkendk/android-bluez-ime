@@ -13,7 +13,7 @@
 		android:orientation="horizontal" android:id="@+id/WaitLayoutGroup"
 		android:padding="5dp">
 
-		<TextView android:text="@string/devicelist_scanningfordevices"
+		<TextView android:text="@string/devicelist_scanningfordevices" android:id="@+id/WaitLabelText"
 			android:layout_width="fill_parent" android:layout_height="fill_parent"
 			android:layout_weight="1" android:gravity="center_vertical"
 			android:paddingLeft="5dp"></TextView>

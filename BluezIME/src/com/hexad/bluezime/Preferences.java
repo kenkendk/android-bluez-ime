@@ -23,7 +23,7 @@ public class Preferences {
 	}
 	
 	public String getSelectedDriverName() {
-		return m_prefs.getString(PREF_DRIVER_NAME, null);
+		return m_prefs.getString(PREF_DRIVER_NAME, BluezService.DEFAULT_DRIVER_NAME);
 	}
 	
 	public void setSelectedDriverName(String value) {

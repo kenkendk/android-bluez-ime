@@ -5,4 +5,5 @@ public interface BluezDriverInterface extends Runnable {
 	String getDeviceAddress();
 	String getDeviceName();
 	String getDriverName();
+	boolean isRunning();
 }

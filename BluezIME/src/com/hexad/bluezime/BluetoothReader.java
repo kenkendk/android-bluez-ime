@@ -53,17 +53,35 @@ public abstract class BluetoothReader implements BluezDriverInterface {
         	//m_socket = device.createRfcommSocketToServiceRecord(HID_UUID);
         	//m_socket.connect(); 
 
-        	//Reflection method, works on HTC desire
-        	Method m = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-	        m_socket = (BluetoothSocket)m.invoke(device, Integer.valueOf(1));
-	        m_socket.connect();
+	        byte[] header = new byte[1024];
+	        int read = -1;
 	        
-	        if (D) Log.d(LOG_NAME, "Connected to " + address);
-        	
-        	byte[] header = new byte[1024];
-        	m_input = m_socket.getInputStream();
-        	int read = m_input.read(header);
-        	        	
+			//We need to do this a few times as that fixes some connection issues
+			int retryCount = 5;
+			do
+			{
+				try {
+		        	//Reflection method, works on HTC desire
+		        	Method m = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+			        m_socket = (BluetoothSocket)m.invoke(device, Integer.valueOf(1));
+			        m_socket.connect();
+
+			        if (D) Log.d(LOG_NAME, "Connected to " + address);
+		        	
+		        	m_input = m_socket.getInputStream();
+		        	read = m_input.read(header);
+
+			        retryCount = 0;
+				} catch (Exception ex) {
+					if (retryCount == 0)
+						throw ex;
+					
+					try { if (m_socket != null) m_socket.close(); }
+					catch (Exception e) { }
+					m_socket = null;
+				}
+			} while(retryCount-- > 0);
+	        
         	if (D) Log.d(LOG_NAME, "Welcome message from controller was " + getHexString(header, 0, read));
 
         	validateWelcomeMessage(header, read);
@@ -77,11 +95,12 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			catch (Exception e) { }
 			
 			m_socket = null;
-        	if (D) Log.d(LOG_NAME + getDriverName(), "Failed to connect to " + address + ", message: " + ex.toString());
+        	Log.d(LOG_NAME + getDriverName(), "Failed to connect to " + address + ", message: " + ex.toString());
         	notifyError(ex);
         	
         	throw ex;
 		}
+			
 	}
 	
 	protected abstract void validateWelcomeMessage(byte[] data, int read);
@@ -98,6 +117,11 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 
 	@Override
 	public abstract String getDriverName();
+
+	@Override
+	public boolean isRunning() {
+		return m_isRunning;
+	}
 
 	@Override
 	public void stop() {
@@ -148,7 +172,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 	protected abstract int parseInputData(byte[] data, int read);
 		
 	private void notifyError(Exception ex) {
-		Log.e(LOG_NAME, ex.toString());
+		Log.e(LOG_NAME + getDriverName(), ex.toString());
 
 		errorBroadcast.putExtra(BluezService.EVENT_ERROR_SHORT, ex.getMessage());
 		errorBroadcast.putExtra(BluezService.EVENT_ERROR_FULL, ex.toString());
