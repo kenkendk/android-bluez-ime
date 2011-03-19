@@ -23,11 +23,9 @@ public class BluezIME extends InputMethodService {
 	private boolean m_connected = false;
 	private Preferences m_prefs;
 	
-	private boolean[] m_lastDirectionsKeys = new boolean[4];
-	private int[] m_directionKeyCodes = new int[] { KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_UP }; 
-	
 	private NotificationManager m_notificationManager;
 	private Notification m_notification;
+	private int[] m_keyMappingCache = null;
 	
 	@Override
 	public void onCreate() {
@@ -36,6 +34,9 @@ public class BluezIME extends InputMethodService {
 		
 		m_notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		m_notification = new Notification(R.drawable.icon, getString(R.string.app_name), System.currentTimeMillis());
+		m_keyMappingCache = new int[Math.max(0x65, KeyEvent.getMaxKeyCode())];
+		for(int i = 0; i < m_keyMappingCache.length; i++)
+			m_keyMappingCache[i] = -1;
 		
 		setNotificationText(getString(R.string.ime_starting));
 
@@ -50,7 +51,7 @@ public class BluezIME extends InputMethodService {
 	
 	private void setNotificationText(CharSequence message) {
 		Intent i = new Intent(this, BluezIMESettings.class);
-		PendingIntent pi = PendingIntent.getActivity(this, 0, i, 0);
+		PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 		m_notification.setLatestEventInfo(this, getString(R.string.app_name), message, pi);
 		m_notificationManager.notify(1, m_notification);
 	}
@@ -175,6 +176,11 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver preferenceChangedHandler = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+
+			//Clear the key mapping cache
+			for(int i = 0; i < m_keyMappingCache.length; i++)
+				m_keyMappingCache[i] = -1;
+			
 			if (m_connected)
 				connect();
 		}
@@ -192,25 +198,17 @@ public class BluezIME extends InputMethodService {
 				if (intent.getAction().equals(BluezService.EVENT_KEYPRESS)) {
 					int action = intent.getIntExtra(BluezService.EVENT_KEYPRESS_ACTION, KeyEvent.ACTION_DOWN);
 					int key = intent.getIntExtra(BluezService.EVENT_KEYPRESS_KEY, 0);
-					ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, key, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
-				} else if (intent.getAction().equals(BluezService.EVENT_DIRECTIONALCHANGE)) {
-					int value = intent.getIntExtra(BluezService.EVENT_DIRECTIONALCHANGE_VALUE, 0);
-					int direction = intent.getIntExtra(BluezService.EVENT_DIRECTIONALCHANGE_DIRECTION, 100);
-					
-					
-					boolean[] newKeyStates = m_lastDirectionsKeys.clone();
-					
-					//We only support X/Y axis
-					if (direction == 0 || direction == 1) {
-						newKeyStates[(direction * 2)] = value > (128 / 2);
-						newKeyStates[(direction * 2) + 1] = value < -(128 / 2);
-					}
 
-					for(int i = 0; i < 4; i++)
-						if (newKeyStates[i] != m_lastDirectionsKeys[i])
-							ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, newKeyStates[i] ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP, m_directionKeyCodes[i], 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
-	
-					m_lastDirectionsKeys = newKeyStates;
+					//This construct ensures that we can perform lock free
+					// access to m_keyMappingCache and never risk sending -1 
+					// as the keyCode
+					int translatedKey = m_keyMappingCache[key];
+					if (translatedKey == -1) {
+						translatedKey = m_prefs.getKeyMapping(key);
+						m_keyMappingCache[key] = translatedKey;
+					} 
+					
+					ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
 				}
 			} catch (Exception ex) {
 				Log.e(LOG_NAME, "Failed to send key events: " + ex.toString());

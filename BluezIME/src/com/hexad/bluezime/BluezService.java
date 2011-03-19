@@ -9,13 +9,14 @@ import android.util.Log;
 
 public class BluezService extends IntentService {
 	
-	public static final String[] DRIVER_NAMES = {"zeemote", "dump"};
-	public static final String[] DRIVER_DISPLAYNAMES = {"Zeemote JS1", "Data dump driver" };
+	public static final String[] DRIVER_NAMES = {"zeemote"};
+	public static final String[] DRIVER_DISPLAYNAMES = {"Zeemote JS1"};
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
 	
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
 	public static final String EVENT_KEYPRESS_KEY = "key";
 	public static final String EVENT_KEYPRESS_ACTION = "action";
+	public static final String EVENT_KEYPRESS_ANALOG_EMULATED = "emulated";
 
 	public static final String EVENT_DIRECTIONALCHANGE = "com.hexad.bluezime.directionalchange";
 	public static final String EVENT_DIRECTIONALCHANGE_DIRECTION = "direction";
@@ -161,8 +162,6 @@ public class BluezService extends IntentService {
 
 			if (driver.toLowerCase().equals("zeemote"))
 				m_reader = new ZeemoteReader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals("dump"))
-				m_reader = new DataDumpReader(address, getApplicationContext());
 			else
 				throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 			

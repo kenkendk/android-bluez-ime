@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+  xmlns:android="http://schemas.android.com/apk/res/android">
+<PreferenceCategory android:title="@string/configuration_header1" android:key="cat_buttons"></PreferenceCategory>
+<PreferenceCategory android:title="@string/configuration_header2" android:key="cat_clear">
+<Preference android:title="@string/configuration_reset_short" android:summary="@string/configuration_reset_long" android:key="reset_button"/>
+</PreferenceCategory>
+
+</PreferenceScreen>

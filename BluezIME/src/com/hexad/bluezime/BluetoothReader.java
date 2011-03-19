@@ -2,6 +2,7 @@ package com.hexad.bluezime;
 
 import java.io.InputStream;
 import java.lang.reflect.Method;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -29,6 +30,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 	protected Intent directionBroadcast = new Intent(BluezService.EVENT_DIRECTIONALCHANGE);
 	
 	//private static final UUID HID_UUID = UUID.fromString("00001124-0000-1000-8000-00805f9b34fb");
+	//private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 	
 	public BluetoothReader(String address, Context context) throws Exception {
 		
@@ -49,8 +51,8 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 	        
 	        if (D) Log.d(LOG_NAME, "Connecting to " + address);
 
-	        //Official method, does not work gives "Discovery error"
-        	//m_socket = device.createRfcommSocketToServiceRecord(HID_UUID);
+	        //Official method, does not work gives "Discovery error" or "Service discovery failed"
+        	//m_socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
         	//m_socket.connect(); 
 
 	        byte[] header = new byte[1024];
@@ -170,7 +172,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 	}
 
 	protected abstract int parseInputData(byte[] data, int read);
-		
+	
 	private void notifyError(Exception ex) {
 		Log.e(LOG_NAME + getDriverName(), ex.toString());
 

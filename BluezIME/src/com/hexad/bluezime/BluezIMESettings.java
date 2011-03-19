@@ -31,6 +31,7 @@ public class BluezIMESettings extends PreferenceActivity {
 	private ListPreference m_drivers;
 	private Preference m_selectIME;
 	private Preference m_helpButton;
+	private Preference m_configureButton;
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
@@ -47,6 +48,7 @@ public class BluezIMESettings extends PreferenceActivity {
         m_drivers = (ListPreference)findPreference("blue_drivers");
         m_selectIME = (Preference)findPreference("blue_selectime");
         m_helpButton = (Preference)findPreference("blue_help");
+        m_configureButton = (Preference)findPreference("configure_keys");
         
         m_helpButton.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
@@ -83,6 +85,8 @@ public class BluezIMESettings extends PreferenceActivity {
         }
         else
         {
+            m_configureButton.setIntent(new Intent(this, ButtonConfiguration.class));
+        	
         	m_bluetoothActivity.setChecked(blue.isEnabled());
         	if (blue.isEnabled()) {
         		m_bluetoothActivity.setEnabled(false);
@@ -242,7 +246,6 @@ public class BluezIMESettings extends PreferenceActivity {
 					m_pairedDevices.setValueIndex(i);
 					break;
 				}
-					
 		}
 		
 		String driver = m_prefs.getSelectedDriverName();
@@ -257,6 +260,8 @@ public class BluezIMESettings extends PreferenceActivity {
 			m_drivers.setSummary(R.string.preference_device_unknown);
 		else
 			m_drivers.setSummary(BluezService.DRIVER_DISPLAYNAMES[index]);
+		
+		m_configureButton.setEnabled(m_prefs.getSelectedDriverName() != null && m_prefs.getSelectedDriverName().length() > 0);
 	}
     
 	private BroadcastReceiver bluetoothStateMonitor = new BroadcastReceiver() {

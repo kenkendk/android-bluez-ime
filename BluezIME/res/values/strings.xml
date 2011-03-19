@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     
-    <string name="app_name">Bluez IME</string>
+<string name="app_name">Bluez IME</string>
 <string name="error_message_generic" formatted="false">Error: %s</string>
 <string name="connected_to_device_message" formatted="false">Connected to %s</string>
 <string name="disconnected_from_device_message" formatted="false">Disconnected from %s</string>
@@ -15,8 +15,8 @@
 <string name="bluetooth_no_device">No device selected</string>
 <string name="invalid_driver" formatted="false">The supplied driver is invalid: %s</string>
 
-<string-array name="driver_displaynames"><item>Zeemote JS1</item>
-<item>Data dump driver</item>
+<string-array name="driver_displaynames">
+  <item>Zeemote JS1</item>
 </string-array>
 <string name="devicelist_scanfordevices">Scan for devices</string>
 <string name="devicelist_scanningfordevices">Scanning for devices ...</string>
@@ -34,6 +34,9 @@
 <string name="preferencelist_selectimehint">Press here to select the Bluez IME\n\nIf "Bluez IME" is not shown, enable it under Settings -> Language and Keyboard</string>
 <string name="preferencelist_selectimetext">Select IME</string>
 
+<string name="preferencelist_configure_keys_short">Configure key mapping</string>
+<string name="preferencelist_configure_keys_long">Optionally select what each button should do</string>
+
 <string name="preference_help_short">Help / Donate / More</string>
 <string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>
 <string name="preference_device_unknown">Unknown device selected</string>
@@ -42,11 +45,28 @@
 
 <string name="settings_title">Bluez IME Settings</string>
 <string name="scan_title">Bluez IME Device Selection</string>
+<string name="button_config_title">Button configuration</string>
 
 <string name="ime_starting">Bluez IME is starting ...</string>
 <string name="ime_connecting" formated="false">Connecting to: %s ...</string>
 <string name="ime_error" formated="false">Error: %s</string>
 <string name="ime_connected" formated="false">Connected to %s</string>
 <string name="ime_disconnected">Not connected</string>
+
+<string name="configuration_header1">Button configuration</string>
+<string name="configuration_header2">Reset configuration</string>
+<string name="configuration_reset_short">Reset all to default</string>
+<string name="configuration_reset_long">Click here to return button mappings to their default</string>
+
+<string name="zeemote_button_a">Button A</string>
+<string name="zeemote_button_b">Button B</string>
+<string name="zeemote_button_c">Button C</string>
+<string name="zeemote_button_d">Button D</string>
+
+<string name="zeemote_axis_left">Thumbstick left</string>
+<string name="zeemote_axis_right">Thumbstick right</string>
+
+<string name="zeemote_axis_up">Thumbstick up</string>
+<string name="zeemote_axis_down">Thumbstick down</string>
 
 </resources>
