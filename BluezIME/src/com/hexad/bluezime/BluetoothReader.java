@@ -135,26 +135,48 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			catch (Exception ex) { notifyError(ex); }
 		}
 
-
 		m_isRunning = false;
 		m_socket = null;
 		m_input = null;
 	}
 
+	/*private byte[][] test = {
+			{(byte)0xb6},
+			{(byte)0x49, (byte)0xf6, (byte)0x09},
+			{(byte)0x00},
+			{(byte)0xf6, (byte)0x09},
+			{(byte)0xb3, (byte)0x07},
+	};
+	
+	private int test_index = 0;
+	
+	private int testRead(byte[] buffer, int offset, int max_len) {
+		for(int i = 0; i < test[test_index].length; i++)
+			buffer[i + offset] = test[test_index][i];
+		return test[test_index++].length;
+	}*/
+		
 	@Override
 	public void run() {
         byte[] buffer = new byte[80];
         int read = 0;
         int errors = 0;
         
+        int unparsed = 0;
+        
         while (m_isRunning) {
         	try {
-        		read = m_input.read(buffer);
+        		
+        		//read = testRead(buffer, unparsed, buffer.length - unparsed);
+        		read = m_input.read(buffer, unparsed, buffer.length - unparsed);
         		errors = 0;
         		
-        		int unparsed = parseInputData(buffer, read);
-        		if (unparsed > 0)
-    				if (D) Log.w(LOG_NAME + getDriverName(), "Unable to interpret the message: " + getHexString(buffer, read - unparsed, read));
+        		unparsed = parseInputData(buffer, read + unparsed);
+        		if (unparsed >= buffer.length - 10) {
+        			if (D) Log.e(LOG_NAME + getDriverName(), "Dumping unparsed data: " + getHexString(buffer, 0, unparsed));
+        			
+        			unparsed = 0;
+        		}
         	} catch (Exception ex) {
         		errors++;
         		if (errors > 10) {

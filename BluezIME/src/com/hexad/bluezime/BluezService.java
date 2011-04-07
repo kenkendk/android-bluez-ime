@@ -9,8 +9,8 @@ import android.util.Log;
 
 public class BluezService extends IntentService {
 	
-	public static final String[] DRIVER_NAMES = {"zeemote"};
-	public static final String[] DRIVER_DISPLAYNAMES = {"Zeemote JS1"};
+	public static final String[] DRIVER_NAMES = {ZeemoteReader.DRIVER_NAME, BGP100Reader.DRIVER_NAME, JoyphoneReader.DRIVER_NAME, DataDumpReader.DRIVER_NAME};
+	public static final String[] DRIVER_DISPLAYNAMES = {ZeemoteReader.DISPLAY_NAME, BGP100Reader.DISPLAY_NAME, JoyphoneReader.DISPLAY_NAME, DataDumpReader.DISPLAY_NAME};
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
 	
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
@@ -160,8 +160,12 @@ public class BluezService extends IntentService {
 			connectingBroadcast.putExtra(EVENT_CONNECTING_ADDRESS, address);
 			sendBroadcast(connectingBroadcast);
 
-			if (driver.toLowerCase().equals("zeemote"))
+			if (driver.toLowerCase().equals(ZeemoteReader.DRIVER_NAME.toLowerCase()))
 				m_reader = new ZeemoteReader(address, getApplicationContext());
+			else if (driver.toLowerCase().equals(BGP100Reader.DRIVER_NAME.toLowerCase()))
+				m_reader = new BGP100Reader(address, getApplicationContext());
+			else if (driver.toLowerCase().equals(JoyphoneReader.DRIVER_NAME.toLowerCase()))
+				m_reader = new JoyphoneReader(address, getApplicationContext());
 			else
 				throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 			

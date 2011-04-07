@@ -12,6 +12,7 @@ public class ZeemoteReader extends BluetoothReader {
 	public static final int KEYCODE_BUTTON_X = 0x63;
 	
 	public static final String DRIVER_NAME = "zeemote";
+	public static final String DISPLAY_NAME = "Zeemote JS1";
 	
 	private final byte BUTTON_UPDATE = 0x07;
 	private final byte DIRECTION_UPDATE = 0x08;

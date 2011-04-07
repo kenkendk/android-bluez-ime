@@ -69,4 +69,26 @@
 <string name="zeemote_axis_up">Thumbstick up</string>
 <string name="zeemote_axis_down">Thumbstick down</string>
 
+
+<string name="bgp100_button_a">Button A</string>
+<string name="bgp100_button_b">Button B</string>
+<string name="bgp100_button_c">Button C</string>
+<string name="bgp100_button_d">Button D</string>
+
+<string name="bgp100_button_l">Button L</string>
+<string name="bgp100_button_r">Button R</string>
+
+<string name="bgp100_button_start">Start Button</string>
+
+<string name="bgp100_dpad_left">Dpad Left</string>
+<string name="bgp100_dpad_right">Dpad Right</string>
+<string name="bgp100_dpad_up">Dpad Up</string>
+<string name="bgp100_dpad_down">Dpad Down</string>
+
+<string name="joyphone_button_select">Select Button</string>
+<string name="joyphone_button_l1">Button L1</string>
+<string name="joyphone_button_r1">Button R1</string>
+<string name="joyphone_button_l2">Button L2</string>
+<string name="joyphone_button_r2">Button R2</string>
+
 </resources>
