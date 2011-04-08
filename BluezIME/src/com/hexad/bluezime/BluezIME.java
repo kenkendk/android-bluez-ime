@@ -34,7 +34,7 @@ public class BluezIME extends InputMethodService {
 		
 		m_notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		m_notification = new Notification(R.drawable.icon, getString(R.string.app_name), System.currentTimeMillis());
-		m_keyMappingCache = new int[Math.max(0x65, KeyEvent.getMaxKeyCode())];
+		m_keyMappingCache = new int[Math.max(0x100, KeyEvent.getMaxKeyCode())];
 		for(int i = 0; i < m_keyMappingCache.length; i++)
 			m_keyMappingCache[i] = -1;
 		
@@ -202,13 +202,17 @@ public class BluezIME extends InputMethodService {
 					//This construct ensures that we can perform lock free
 					// access to m_keyMappingCache and never risk sending -1 
 					// as the keyCode
-					int translatedKey = m_keyMappingCache[key];
-					if (translatedKey == -1) {
-						translatedKey = m_prefs.getKeyMapping(key);
-						m_keyMappingCache[key] = translatedKey;
-					} 
-					
-					ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+					if (key >= m_keyMappingCache.length) {
+						Log.e(LOG_NAME, "Key reported by driver: " + key + ", size of keymapping array: " + m_keyMappingCache.length);
+					} else {
+						int translatedKey = m_keyMappingCache[key];
+						if (translatedKey == -1) {
+							translatedKey = m_prefs.getKeyMapping(key);
+							m_keyMappingCache[key] = translatedKey;
+						} 
+						
+						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+					}
 				}
 			} catch (Exception ex) {
 				Log.e(LOG_NAME, "Failed to send key events: " + ex.toString());
