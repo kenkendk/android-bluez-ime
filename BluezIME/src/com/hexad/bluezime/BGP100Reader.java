@@ -8,7 +8,7 @@ import android.view.KeyEvent;
 
 public class BGP100Reader extends BluetoothReader {
 
-	private static final boolean D = true;
+	private static final boolean D = false;
 	
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
