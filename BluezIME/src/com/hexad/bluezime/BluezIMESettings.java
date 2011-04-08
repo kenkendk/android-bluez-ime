@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
@@ -88,19 +89,43 @@ public class BluezIMESettings extends PreferenceActivity {
             m_configureButton.setIntent(new Intent(this, ButtonConfiguration.class));
         	
         	m_bluetoothActivity.setChecked(blue.isEnabled());
+        	m_bluetoothActivity.setEnabled(true);
+        	
         	if (blue.isEnabled()) {
-        		m_bluetoothActivity.setEnabled(false);
         		m_bluetoothActivity.setSummary(R.string.bluetooth_state_on);
-        	}
-        	else {
-        		m_bluetoothActivity.setEnabled(true);
+        	} else {
         		m_bluetoothActivity.setSummary(R.string.bluetooth_state_off);
         	}
         	
         	m_bluetoothActivity.setOnPreferenceClickListener(new OnPreferenceClickListener() {
         		public boolean onPreferenceClick(Preference preference) {
-        			m_bluetoothActivity.setChecked(false);
-        			startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+        			
+        			if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+        				m_bluetoothActivity.setChecked(true);
+        				AlertDialog.Builder dlg = new AlertDialog.Builder(BluezIMESettings.this);
+        				dlg.setCancelable(true);
+        				dlg.setMessage(R.string.bluetooth_disable_question);
+        				dlg.setTitle(R.string.bluetooth_disable_dialog_title);
+        				
+        				dlg.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								BluetoothAdapter.getDefaultAdapter().disable();
+							}}
+        				);
+        				
+        				dlg.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+							}}
+        				);
+        				
+        				dlg.show();
+        				
+        			} else {
+	        			m_bluetoothActivity.setChecked(false);
+	        			startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+        			}
         			return false;
         		}
         	});
@@ -271,7 +296,7 @@ public class BluezIMESettings extends PreferenceActivity {
 			int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
 			if (state == BluetoothAdapter.STATE_ON) {
 				m_bluetoothActivity.setChecked(true);
-				m_bluetoothActivity.setEnabled(false);
+				m_bluetoothActivity.setEnabled(true);
 				m_bluetoothActivity.setSummary(R.string.bluetooth_state_on);
 				
 				enumerateBondedDevices();

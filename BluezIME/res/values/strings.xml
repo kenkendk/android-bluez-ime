@@ -10,6 +10,12 @@
 <string name="bluetooth_state_turning_on">Bluetooth is turning on ...</string>
 <string name="bluetooth_state_turning_off">Bluetooth is turning off ...</string>
 <string name="bluetooth_unsupported">Bluetooth is not supported on this device</string>
+<string name="bluetooth_disable_question">This will turn off Bluetooth,\neven if any devices are connected.\n\nDo you really want to disconnect?</string>
+<string name="bluetooth_disable_dialog_title">Turn off Bluetooth</string>
+
+<string name="yes">Yes</string>
+<string name="no">No</string>
+
 
 <string name="bluetooth_scan_menu">Scan ...</string>
 <string name="bluetooth_no_device">No device selected</string>
