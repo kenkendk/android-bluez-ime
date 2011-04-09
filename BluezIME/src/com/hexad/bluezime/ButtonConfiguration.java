@@ -51,9 +51,9 @@ public class ButtonConfiguration extends PreferenceActivity {
 		} else if (driver.equals(BGP100Reader.DRIVER_NAME)) {
 			buttonCodes = BGP100Reader.getButtonCodes();
 			buttonNames = BGP100Reader.getButtonNames();
-		} else if (driver.equals(JoyphoneReader.DRIVER_NAME)) {
-			buttonCodes = JoyphoneReader.getButtonCodes();
-			buttonNames = JoyphoneReader.getButtonNames();
+		} else if (driver.equals(PhonejoyReader.DRIVER_NAME)) {
+			buttonCodes = PhonejoyReader.getButtonCodes();
+			buttonNames = PhonejoyReader.getButtonNames();
 		} else {
 			buttonCodes = new int[0];
 			buttonNames = new int[0];

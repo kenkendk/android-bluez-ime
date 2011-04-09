@@ -3,7 +3,7 @@ package com.hexad.bluezime;
 import android.content.Context;
 import android.view.KeyEvent;
 
-public class JoyphoneReader extends BGP100Reader {
+public class PhonejoyReader extends BGP100Reader {
 
 	public static final int KEYCODE_BUTTON_L2 = 0x68;
 	public static final int KEYCODE_BUTTON_R2 = 0x69;
@@ -12,7 +12,7 @@ public class JoyphoneReader extends BGP100Reader {
 	public static final String DRIVER_NAME = "joyphone";
 	public static final String DISPLAY_NAME = "Joyphone";
 	
-	public JoyphoneReader(String address, Context context) throws Exception {
+	public PhonejoyReader(String address, Context context) throws Exception {
 		super(address, context);
 		
 		//R
