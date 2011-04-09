@@ -9,15 +9,15 @@ public class PhonejoyReader extends BGP100Reader {
 	public static final int KEYCODE_BUTTON_R2 = 0x69;
 	public static final int KEYCODE_BUTTON_SELECT = 0x6d; 
 
-	public static final String DRIVER_NAME = "joyphone";
-	public static final String DISPLAY_NAME = "Joyphone";
+	public static final String DRIVER_NAME = "phonejoy";
+	public static final String DISPLAY_NAME = "Phonejoy / Vinyson";
 	
 	public PhonejoyReader(String address, Context context) throws Exception {
 		super(address, context);
 		
 		//R
-		_lookup.put(0xb946, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));
-		_lookup.put(0xf906, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R2));
+		_lookup.put(0xb24e, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));
+		_lookup.put(0xf20e, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R2));
 
 		//L
 		_lookup.put(0xb14d, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L2));
