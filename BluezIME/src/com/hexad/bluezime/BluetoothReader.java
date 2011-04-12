@@ -178,6 +178,8 @@ public abstract class BluetoothReader implements BluezDriverInterface {
         			unparsed = 0;
         		}
         	} catch (Exception ex) {
+        		if (D) Log.e(LOG_NAME + getDriverName(), "Got error: " + ex.toString());
+        		
         		errors++;
         		if (errors > 10) {
     				//Give up

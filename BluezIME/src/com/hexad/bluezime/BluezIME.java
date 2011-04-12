@@ -210,7 +210,7 @@ public class BluezIME extends InputMethodService {
 							translatedKey = m_prefs.getKeyMapping(key);
 							m_keyMappingCache[key] = translatedKey;
 						} 
-						
+						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key);
 						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
 					}
 				}
