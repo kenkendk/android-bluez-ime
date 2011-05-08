@@ -15,17 +15,25 @@ public class PhonejoyReader extends BGP100Reader {
 	public PhonejoyReader(String address, Context context) throws Exception {
 		super(address, context);
 		
+		//Bugfix: Phonejoy sends incorrect first byte, so the lower 4 bits are cleared
+		
 		//R
-		_lookup.put(0xb24e, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));
-		_lookup.put(0xf20e, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R2));
+		//_lookup.put(0xb24e, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));
+		//_lookup.put(0xf20e, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R2));
+		_lookup.put(0xb04e, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));
+		_lookup.put(0xf00e, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R2));
 
 		//L
-		_lookup.put(0xb14d, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L2));
-		_lookup.put(0xf10d, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L2));
+		//_lookup.put(0xb14d, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L2));
+		//_lookup.put(0xf10d, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L2));
+		_lookup.put(0xb04d, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L2));
+		_lookup.put(0xf00d, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L2));
 
 		//Select
-		_lookup.put(0xb34c, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_SELECT));
-		_lookup.put(0xf30c, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_SELECT));
+		//_lookup.put(0xb34c, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_SELECT));
+		//_lookup.put(0xf30c, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_SELECT));
+		_lookup.put(0xb04c, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_SELECT));
+		_lookup.put(0xf00c, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_SELECT));
 	}
 
 	@Override

@@ -35,49 +35,73 @@ public class BGP100Reader extends BluetoothReader {
 		
 		_lookup = new HashMap<Integer, KeyEvent>();
 
+		//Bugfix: Phonejoy sends incorrect first byte, so the lower 4 bits are cleared
+		
 		//A
-		_lookup.put(0xb649, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_A));
-		_lookup.put(0xf609, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_A));
+		//_lookup.put(0xb649, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_A));
+		//_lookup.put(0xf609, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_A));
+		_lookup.put(0xb049, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_A));
+		_lookup.put(0xf009, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_A));
 
 		//B
-		_lookup.put(0xb54a, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_B));
-		_lookup.put(0xf50a, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_B));
+		//_lookup.put(0xb54a, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_B));
+		//_lookup.put(0xf50a, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_B));
+		_lookup.put(0xb04a, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_B));
+		_lookup.put(0xf00a, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_B));
 
 		//C
-		_lookup.put(0xb748, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_C));
-		_lookup.put(0xf708, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_C));
+		//_lookup.put(0xb748, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_C));
+		//_lookup.put(0xf708, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_C));
+		_lookup.put(0xb048, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_C));
+		_lookup.put(0xf008, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_C));
 
 		//D
-		_lookup.put(0xbe41, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_X));
-		_lookup.put(0xfe01, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_X));
+		//_lookup.put(0xbe41, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_X));
+		//_lookup.put(0xfe01, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_X));
+		_lookup.put(0xb041, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_X));
+		_lookup.put(0xf001, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_X));
 
 		//Left
-		_lookup.put(0xbb44, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
-		_lookup.put(0xfb04, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_LEFT));
+		//_lookup.put(0xbb44, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
+		//_lookup.put(0xfb04, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_LEFT));
+		_lookup.put(0xb044, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_LEFT));
+		_lookup.put(0xf004, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_LEFT));
 
 		//Right
-		_lookup.put(0xbc43, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
-		_lookup.put(0xfc03, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_RIGHT));
+		//_lookup.put(0xbc43, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
+		//_lookup.put(0xfc03, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_RIGHT));
+		_lookup.put(0xb043, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_RIGHT));
+		_lookup.put(0xf003, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_RIGHT));
 
 		//Up
-		_lookup.put(0xba45, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP));
-		_lookup.put(0xfa05, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_UP));
+		//_lookup.put(0xba45, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP));
+		//_lookup.put(0xfa05, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_UP));
+		_lookup.put(0xb045, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_UP));
+		_lookup.put(0xf005, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_UP));
 
 		//Down
-		_lookup.put(0xbd42, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN));
-		_lookup.put(0xfd02, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_DOWN));
+		//_lookup.put(0xbd42, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN));
+		//_lookup.put(0xfd02, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_DOWN));
+		_lookup.put(0xb042, new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DPAD_DOWN));
+		_lookup.put(0xf002, new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DPAD_DOWN));
 
 		//R
-		_lookup.put(0xb946, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R1));
-		_lookup.put(0xf906, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R1));
+		//_lookup.put(0xb946, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R1));
+		//_lookup.put(0xf906, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R1));
+		_lookup.put(0xb046, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R1));
+		_lookup.put(0xf006, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_R1));
 
 		//L
-		_lookup.put(0xb847, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L1));
-		_lookup.put(0xf807, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L1));
+		//_lookup.put(0xb847, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L1));
+		//_lookup.put(0xf807, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L1));
+		_lookup.put(0xb047, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_L1));
+		_lookup.put(0xf007, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_L1));
 
 		//Start
-		_lookup.put(0xb44b, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_START));
-		_lookup.put(0xf40b, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_START));
+		//_lookup.put(0xb44b, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_START));
+		//_lookup.put(0xf40b, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_START));
+		_lookup.put(0xb04b, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_START));
+		_lookup.put(0xf00b, new KeyEvent(KeyEvent.ACTION_UP,   KEYCODE_BUTTON_START));
 
 	}
 
@@ -100,6 +124,10 @@ public class BGP100Reader extends BluetoothReader {
 			//If the high bit is set in byte 0 and not in byte 1, we accept it
 			if (((data[offset] & 0x80) != 0) && ((data[offset + 1] & 0x80) == 0)) {
 				int value = (data[offset] & 0xff) << 8 | (data[offset + 1] & 0xff);
+				
+				//Bugfix: Phonejoy sends incorrect first byte, so the lower 4 bits are cleared
+				value = value & 0xf0ff;
+				
 				if (_lookup.containsKey(value)) {
 					
 					KeyEvent e = _lookup.get(value);
