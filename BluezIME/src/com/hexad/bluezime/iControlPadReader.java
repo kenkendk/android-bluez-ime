@@ -11,7 +11,7 @@ import android.view.KeyEvent;
 
 public class iControlPadReader extends BluetoothReader {
 
-	private static final boolean D = true;
+	private static final boolean D = false;
 	
 	public static final String DRIVER_NAME = "icp";
 	public static final String DISPLAY_NAME = "iControlPad";
