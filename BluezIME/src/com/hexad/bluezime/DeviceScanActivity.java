@@ -130,41 +130,6 @@ public class DeviceScanActivity extends Activity {
 		unregisterReceiver(deviceBondedMonitor);
 	}
 	
-	private class PairByConnectThread extends Thread {
-		
-		private BluetoothDevice m_device;
-		public PairByConnectThread(BluetoothDevice device) {
-			m_device = device;
-		}
-		
-		@Override
-		public void run() {
-			BluetoothSocket socket = null;
-			
-			try {
-	        	Method m = m_device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-		        socket = (BluetoothSocket)m.invoke(m_device, Integer.valueOf(1));
-		        socket.connect();
-			} catch (Exception ex) {
-			} finally {
-				if (socket != null) {
-					try { socket.close(); }
-					catch (Exception ex2) {}
-				}
-				
-				runOnUiThread(new Runnable() {
-					@Override
-					public void run() {
-						m_scanButton.setVisibility(View.VISIBLE);
-						m_scanWaitMarker.setVisibility(View.GONE);
-					}
-				});
-			}
-			
-		}
-	}
-	
-	
 	private void deviceSelected(BluetoothDevice device) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DEVICE, device);
@@ -180,18 +145,8 @@ public class DeviceScanActivity extends Activity {
 			BluetoothDevice device = (BluetoothDevice)v.getTag(); 
 			
 			if (device != null) {
-				if (device.getBondState() == BluetoothDevice.BOND_NONE) {
-					m_bluetoothAdapter.cancelDiscovery();
-					
-					m_scanWaitText.setText(String.format(getString(R.string.devicelist_pairingwithdevice), device.getAddress()));
-					m_scanButton.setVisibility(View.GONE);
-					m_scanWaitMarker.setVisibility(View.VISIBLE);
-					new PairByConnectThread(device).start();
-				}
-				else
-				{
-					deviceSelected(device);
-				}
+				m_bluetoothAdapter.cancelDiscovery();
+				deviceSelected(device);
 			}
         }
     };
