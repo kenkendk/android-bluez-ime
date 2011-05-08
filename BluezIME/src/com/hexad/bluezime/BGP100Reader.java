@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 public class BGP100Reader extends BluetoothReader {
 
 	private static final boolean D = false;
+	private static final boolean D2 = false;
 	
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
@@ -24,8 +25,12 @@ public class BGP100Reader extends BluetoothReader {
 	
 	protected HashMap<Integer, KeyEvent> _lookup;
 	
+	protected HashMap<Integer, Boolean> _keyStates;
+	
 	public BGP100Reader(String address, Context context) throws Exception {
 		super(address, context);
+		
+		
 		
 		//TODO: It is possible to map all buttons by looking at
 		// the least significant 4 bits, and then use a 
@@ -113,11 +118,21 @@ public class BGP100Reader extends BluetoothReader {
 	@Override
 	protected int parseInputData(byte[] data, int read) {
 		
+		//For debugging, we keep track of the current key states
+		if (D2 && _keyStates == null) {
+			_keyStates = new HashMap<Integer, Boolean>();
+			
+			for(Integer i : _lookup.keySet())
+				_keyStates.put(_lookup.get(i).getKeyCode(), false);
+		}
+		
 		if (read < 2)
 			return read;
 		
 		int offset = 0;
 		int remaining = read;
+		
+		if (D) Log.w(getDriverName(), "Sequence read from device: " + getHexString(data, 0, data.length));
 		
 		while(remaining >= 2) {
 
@@ -132,23 +147,44 @@ public class BGP100Reader extends BluetoothReader {
 					
 					KeyEvent e = _lookup.get(value);
 					
+					if (D) Log.w(getDriverName(), "Sending button event, button: " + e.getKeyCode() + ", direction: " + (e.getAction() == KeyEvent.ACTION_DOWN ? "DOWN" : "UP"));
+					
+					if (D2) {
+						if (_keyStates.containsKey(e.getKeyCode())) {
+							boolean oldState = _keyStates.get(e.getKeyCode());
+							boolean newState = e.getAction() == KeyEvent.ACTION_DOWN; 
+							
+							if (oldState == newState)
+								Log.w(getDriverName(), "Probably a bug, got a new event, but the state was not changed? KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
+							else
+								Log.d(getDriverName(), "Changed state for KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
+							
+							_keyStates.remove(e.getKeyCode());
+							_keyStates.put(e.getKeyCode(), newState);
+							
+						} else {
+							Log.e(getDriverName(), "Bug in logging, the key was found, but then not? KeyCode:" + e.getKeyCode());
+						}
+							
+					}
+					
+					
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, e.getAction());
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, e.getKeyCode());
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
 					m_context.sendBroadcast(keypressBroadcast);
 					
 				} else {
-					if (D) Log.w(getDriverName(), "Umatched button press: " + getHexString(data, offset, 2));
+					if (D) Log.w(getDriverName(), "Umatched button press: " + getHexString(data, offset, 2) + ", full block: " + getHexString(data, 0, data.length));
 				}
 				
 				offset += 2;
 				remaining -= 2;
 			} else {
+				if (D) Log.w(getDriverName(), "Umatched byte #" + offset + " in: " + getHexString(data, 0, data.length));
 				offset++;
 				remaining--;
 			}
-			
-			//Otherwise just skip 1
 		}
 		
 		return remaining;
