@@ -63,15 +63,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			do
 			{
 				try {
-		        	//Reflection method, works on HTC desire
-		        	Method m = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-			        m_socket = (BluetoothSocket)m.invoke(device, Integer.valueOf(1));
-			        m_socket.connect();
-
-			        if (D) Log.d(LOG_NAME, "Connected to " + address);
-		        	
-		        	m_input = m_socket.getInputStream();
-		        	read = m_input.read(header);
+					read = setupConnection(device, header);
 
 			        retryCount = 0;
 				} catch (Exception ex) {
@@ -103,6 +95,19 @@ public abstract class BluetoothReader implements BluezDriverInterface {
         	throw ex;
 		}
 			
+	}
+	
+	protected int setupConnection(BluetoothDevice device, byte[] readBuffer) throws Exception {
+    	//Reflection method, works on HTC desire
+    	Method secure = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+
+        m_socket = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+        m_socket.connect();
+
+        if (D) Log.d(LOG_NAME, "Connected to " + m_address);
+    	
+    	m_input = m_socket.getInputStream();
+    	return m_input.read(readBuffer);		
 	}
 	
 	protected abstract void validateWelcomeMessage(byte[] data, int read);
@@ -155,7 +160,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			buffer[i + offset] = test[test_index][i];
 		return test[test_index++].length;
 	}*/
-		
+	
 	@Override
 	public void run() {
         byte[] buffer = new byte[80];
@@ -197,7 +202,7 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 
 	protected abstract int parseInputData(byte[] data, int read);
 	
-	private void notifyError(Exception ex) {
+	protected void notifyError(Exception ex) {
 		Log.e(LOG_NAME + getDriverName(), ex.toString());
 
 		errorBroadcast.putExtra(BluezService.EVENT_ERROR_SHORT, ex.getMessage());

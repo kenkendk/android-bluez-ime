@@ -97,4 +97,30 @@
 <string name="joyphone_button_l2">Button L2</string>
 <string name="joyphone_button_r2">Button R2</string>
 
+<string name="icp_button_left">Dpad Left</string>
+<string name="icp_button_right">Dpad Right</string>
+<string name="icp_button_up">Dpad Up</string>
+<string name="icp_button_down">Dpad Down</string>
+
+<string name="icp_button_a">Button A</string>
+<string name="icp_button_b">Button B</string>
+<string name="icp_button_x">Button X</string>
+<string name="icp_button_y">Button Y</string>
+
+<string name="icp_button_l">Button L</string>
+<string name="icp_button_r">Button R</string>
+
+<string name="icp_button_start">Start Button</string>
+<string name="icp_button_select">Select Button</string>
+
+<string name="icp_leftnub_up">Left Nub Up</string>
+<string name="icp_leftnub_down">Left Nub Down</string>
+<string name="icp_leftnub_left">Left Nub Left</string>
+<string name="icp_leftnub_right">Left Nub Right</string>
+
+<string name="icp_rightnub_up">Right Nub Up</string>
+<string name="icp_rightnub_down">Right Nub Down</string>
+<string name="icp_rightnub_left">Right Nub Left</string>
+<string name="icp_rightnub_right">Right Nub Right</string>
+
 </resources>

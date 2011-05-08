@@ -54,6 +54,9 @@ public class ButtonConfiguration extends PreferenceActivity {
 		} else if (driver.equals(PhonejoyReader.DRIVER_NAME)) {
 			buttonCodes = PhonejoyReader.getButtonCodes();
 			buttonNames = PhonejoyReader.getButtonNames();
+		} else if (driver.equals(iControlPadReader.DRIVER_NAME)) {
+			buttonCodes = iControlPadReader.getButtonCodes();
+			buttonNames = iControlPadReader.getButtonNames();
 		} else {
 			buttonCodes = new int[0];
 			buttonNames = new int[0];
