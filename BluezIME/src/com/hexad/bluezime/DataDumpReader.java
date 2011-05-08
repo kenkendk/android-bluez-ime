@@ -63,6 +63,14 @@ public class DataDumpReader extends BluetoothReader {
 				break;
 			}
 		}
+		
+		if (m_socket == null) {
+	    	Method secure = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
+			
+	    	m_socket = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+	        m_socket.connect();
+		}
+			
         Log.d(LOG_NAME, "Connected to " + m_address);
     	
     	m_input = m_socket.getInputStream();
