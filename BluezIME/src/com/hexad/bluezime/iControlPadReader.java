@@ -150,9 +150,6 @@ public class iControlPadReader extends BluetoothReader {
 				}
 			}
 			v = v >> 1;
-		
-			if (v == 0)
-				return;
 		}
 		
 	}
@@ -168,7 +165,7 @@ public class iControlPadReader extends BluetoothReader {
 			if (D) Log.d(getDriverName(), "Got seq: " + getHexString(data, offset, 6));
 
 			parseAnalog(data, offset);
-			parseDigital(data[4], data[5]);
+			parseDigital(data[offset + 4], data[offset + 5]);
 			
 			offset += 6;
 			remaining -= 6;
