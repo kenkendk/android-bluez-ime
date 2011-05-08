@@ -1,12 +1,10 @@
 package com.hexad.bluezime;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
