@@ -18,21 +18,19 @@
 package com.hexad.bluezime;
 
 import java.io.InputStream;
-import java.lang.reflect.Method;
-
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
-public abstract class BluetoothReader implements BluezDriverInterface {
+public abstract class RfcommReader implements BluezDriverInterface {
 
 	private static final boolean D = false;
-	private static final String LOG_NAME = "BluetoothReader - ";
+	private static final String LOG_NAME = "RfcommReader - ";
 	
 	protected volatile boolean m_isRunning = true;
+	protected boolean m_useInsecureChannel = false;
 
 	protected BluetoothSocket m_socket = null;
 	protected InputStream m_input = null;
@@ -45,12 +43,18 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 	protected Intent disconnectedBroadcast = new Intent(BluezService.EVENT_DISCONNECTED);
 	protected Intent keypressBroadcast = new Intent(BluezService.EVENT_KEYPRESS);
 	protected Intent directionBroadcast = new Intent(BluezService.EVENT_DIRECTIONALCHANGE);
+	protected Intent accelerometerBroadcast = new Intent(BluezService.EVENT_ACCELEROMETERCHANGE);
+	
+	protected ImprovedBluetoothDevice m_device;
 	
 	//private static final UUID HID_UUID = UUID.fromString("00001124-0000-1000-8000-00805f9b34fb");
 	//private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 	
-	public BluetoothReader(String address, Context context) throws Exception {
-		
+	public RfcommReader(String address, Context context) throws Exception {
+		this(address, context, true);
+	}
+
+	protected RfcommReader(String address, Context context, boolean connect) throws Exception {
 		try
 		{
 			m_context = context;
@@ -63,15 +67,31 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			
 			blue.cancelDiscovery();
 			
-	        BluetoothDevice device = blue.getRemoteDevice(address);
-	        m_name = device.getName();
+			m_device = new ImprovedBluetoothDevice(blue.getRemoteDevice(address));
+	        m_name = m_device.getName();
 	        
-	        if (D) Log.d(LOG_NAME, "Connecting to " + address);
+	        if (connect)
+	        	doConnect();
+		}
+		catch (Exception ex)
+		{
+			try { if (m_socket != null) m_socket.close(); }
+			catch (Exception e) { }
+			
+			m_socket = null;
+	    	Log.d(LOG_NAME + getDriverName(), "Failed to connect to " + address + ", message: " + ex.toString());
+	    	notifyError(ex);
+	    	
+	    	throw ex;
+		}
+	       
+		
+	}
 
-	        //Official method, does not work gives "Discovery error" or "Service discovery failed"
-        	//m_socket = device.createRfcommSocketToServiceRecord(SPP_UUID);
-        	//m_socket.connect(); 
-
+	protected void doConnect() throws Exception {
+		try {
+	        if (D) Log.d(LOG_NAME, "Connecting to " + m_address);
+	
 	        byte[] header = new byte[1024];
 	        int read = -1;
 	        
@@ -80,8 +100,8 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			do
 			{
 				try {
-					read = setupConnection(device, header);
-
+					read = setupConnection(m_device, header);
+	
 			        retryCount = 0;
 				} catch (Exception ex) {
 					if (retryCount == 0)
@@ -93,11 +113,11 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 				}
 			} while(retryCount-- > 0);
 	        
-        	if (D) Log.d(LOG_NAME, "Welcome message from controller was " + getHexString(header, 0, read));
-
-        	validateWelcomeMessage(header, read);
-        	
-			connectedBroadcast.putExtra(BluezService.EVENT_CONNECTED_ADDRESS, address);
+	    	if (D) Log.d(LOG_NAME, "Welcome message from controller was " + getHexString(header, 0, read));
+	
+	    	validateWelcomeMessage(header, read);
+	    	
+			connectedBroadcast.putExtra(BluezService.EVENT_CONNECTED_ADDRESS, m_address);
 			m_context.sendBroadcast(connectedBroadcast);
 		}
 		catch (Exception ex)
@@ -106,19 +126,15 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 			catch (Exception e) { }
 			
 			m_socket = null;
-        	Log.d(LOG_NAME + getDriverName(), "Failed to connect to " + address + ", message: " + ex.toString());
-        	notifyError(ex);
-        	
-        	throw ex;
+	    	Log.d(LOG_NAME + getDriverName(), "Failed to connect to " + m_address + ", message: " + ex.toString());
+	    	notifyError(ex);
+	    	
+	    	throw ex;
 		}
-			
 	}
 	
-	protected int setupConnection(BluetoothDevice device, byte[] readBuffer) throws Exception {
-    	//Reflection method, works on HTC desire
-    	Method secure = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-
-        m_socket = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
+        m_socket = m_useInsecureChannel ? device.createInsecureRfcommSocket(1) : device.createRfcommSocket(1);
         m_socket.connect();
 
         if (D) Log.d(LOG_NAME, "Connected to " + m_address);
@@ -161,26 +177,10 @@ public abstract class BluetoothReader implements BluezDriverInterface {
 		m_socket = null;
 		m_input = null;
 	}
-
-	/*private byte[][] test = {
-			{(byte)0xb6},
-			{(byte)0x49, (byte)0xf6, (byte)0x09},
-			{(byte)0x00},
-			{(byte)0xf6, (byte)0x09},
-			{(byte)0xb3, (byte)0x07},
-	};
-	
-	private int test_index = 0;
-	
-	private int testRead(byte[] buffer, int offset, int max_len) {
-		for(int i = 0; i < test[test_index].length; i++)
-			buffer[i + offset] = test[test_index][i];
-		return test[test_index++].length;
-	}*/
 	
 	@Override
 	public void run() {
-        byte[] buffer = new byte[80];
+        byte[] buffer = new byte[0x80];
         int read = 0;
         int errors = 0;
         
@@ -188,17 +188,25 @@ public abstract class BluetoothReader implements BluezDriverInterface {
         
         while (m_isRunning) {
         	try {
-        		
-        		//read = testRead(buffer, unparsed, buffer.length - unparsed);
         		read = m_input.read(buffer, unparsed, buffer.length - unparsed);
         		errors = 0;
         		
         		unparsed = parseInputData(buffer, read + unparsed);
+        		if (unparsed < 0)
+        			unparsed = 0;
+        		
         		if (unparsed >= buffer.length - 10) {
         			if (D) Log.e(LOG_NAME + getDriverName(), "Dumping unparsed data: " + getHexString(buffer, 0, unparsed));
         			
         			unparsed = 0;
         		}
+        		
+        		//Copy the remaining data back to the beginning of the buffer 
+        		// to emulate a sliding window buffer
+        		if (unparsed > 0) {
+        			System.arraycopy(buffer, read - unparsed, buffer, 0, unparsed);
+        		}
+        		
         	} catch (Exception ex) {
         		if (D) Log.e(LOG_NAME + getDriverName(), "Got error: " + ex.toString());
         		

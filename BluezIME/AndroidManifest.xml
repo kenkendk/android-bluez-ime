@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.hexad.bluezime"
-      android:versionCode="6" android:versionName="1.5">
+      android:versionCode="7" android:versionName="1.6">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
 
    	<service android:name="BluezService" android:exported="true" android:enabled="true" >
@@ -34,12 +34,25 @@
 	        <category android:name="android.intent.category.LAUNCHER" />
 	    </intent-filter>
     </activity> 
-                
+              
+    <!-- BEGIN: Support for in-app donation -->
+    <service android:name="com.hexad.bluezime.donation.BillingService" />
+
+    <receiver android:name="com.hexad.bluezime.donation.BillingReceiver">
+      <intent-filter>
+        <action android:name="com.android.vending.billing.IN_APP_NOTIFY" />
+        <action android:name="com.android.vending.billing.RESPONSE_CODE" />
+        <action android:name="com.android.vending.billing.PURCHASE_STATE_CHANGED" />
+      </intent-filter>
+    </receiver>
+    <!-- END: Support for in-app donation -->
+    
 	</application>
 	
     <uses-sdk android:minSdkVersion="8" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="com.android.vending.BILLING" />
 
 </manifest> 

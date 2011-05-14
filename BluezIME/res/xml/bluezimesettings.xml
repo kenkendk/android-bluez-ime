@@ -15,9 +15,11 @@
 	</PreferenceCategory>
 
 	<PreferenceCategory android:title="@string/preferencelist_header3">
+		<ListPreference android:title="@string/preferencelist_donate_short" android:summary="@string/preferencelist_donate_long" android:key="donate_button"></ListPreference>
 		<Preference android:title="@string/preferencelist_configure_keys_short" android:summary="@string/preferencelist_configure_keys_long" android:key="configure_keys"></Preference>
 		<Preference android:key="blue_help" android:summary="@string/preference_help_long"
 			android:title="@string/preference_help_short" />
-	</PreferenceCategory>
+	
+</PreferenceCategory>
 
 </PreferenceScreen>

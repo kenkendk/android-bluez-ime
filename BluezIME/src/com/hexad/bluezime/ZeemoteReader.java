@@ -20,7 +20,7 @@ package com.hexad.bluezime;
 import android.content.Context;
 import android.view.KeyEvent;
 
-public class ZeemoteReader extends BluetoothReader {
+public class ZeemoteReader extends RfcommReader {
 	
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
@@ -34,6 +34,11 @@ public class ZeemoteReader extends BluetoothReader {
 	private final byte BUTTON_UPDATE = 0x07;
 	private final byte DIRECTION_UPDATE = 0x08;
 	private final byte MAGIC_NUMBER = (byte)0xA1;
+
+	//The max value a nub can report
+	private static int ANALOG_NUB_MAX_VALUE = 127;
+	//How far the nub must be pressed for it to issue an emulated keypress
+	private static int ANALOG_NUB_THRESHOLD = ANALOG_NUB_MAX_VALUE / 2;
 
 	//This is the number of directions supported, hardcoded into this app
 	private static final int SUPPORTED_DIRECTIONS = 4;
@@ -144,8 +149,8 @@ public class ZeemoteReader extends BluetoothReader {
 						
 						//We only support X/Y axis
 						if (i == 0 || i == 1) {
-							newKeyStates[(i * 2)] = directions[i] > (128 / 2);
-							newKeyStates[(i * 2) + 1] = directions[i] < -(128 / 2);
+							newKeyStates[(i * 2)] = directions[i] > ANALOG_NUB_THRESHOLD;
+							newKeyStates[(i * 2) + 1] = directions[i] < -ANALOG_NUB_THRESHOLD;
 						}
 					}
 				

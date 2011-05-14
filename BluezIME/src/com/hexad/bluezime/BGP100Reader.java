@@ -23,7 +23,7 @@ import android.content.Context;
 import android.util.Log;
 import android.view.KeyEvent;
 
-public class BGP100Reader extends BluetoothReader {
+public class BGP100Reader extends RfcommReader {
 
 	private static final boolean D = false;
 	private static final boolean D2 = false;

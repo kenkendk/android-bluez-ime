@@ -17,9 +17,12 @@
 */
 package com.hexad.bluezime;
 
+import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Set;
 import com.hexad.bluezime.R;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -50,10 +53,14 @@ public class BluezIMESettings extends PreferenceActivity {
 	private Preference m_selectIME;
 	private Preference m_helpButton;
 	private Preference m_configureButton;
+	private ListPreference m_donateButton;
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
 	private Preferences m_prefs;
+	
+	@SuppressWarnings("unused")
+	private Object m_donationObserver; 
 	
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,13 +74,30 @@ public class BluezIMESettings extends PreferenceActivity {
         m_selectIME = (Preference)findPreference("blue_selectime");
         m_helpButton = (Preference)findPreference("blue_help");
         m_configureButton = (Preference)findPreference("configure_keys");
+        m_donateButton = (ListPreference)findPreference("donate_button");
+        
+        //Populate the list, otherwise the app will crash
+        m_donateButton.setEntries(new CharSequence[] { getString(R.string.preference_use_paypal) });
+        m_donateButton.setEntryValues(new CharSequence[] {"PAYPAL"} );
+        
+        try {
+        	//This code enables the in-app donation system, but does not require it for compilation
+        	//This is done to avoid polluting the project source with all the boilerplate code
+        	dalvik.system.PathClassLoader loader = new dalvik.system.PathClassLoader(this.getPackageCodePath(), java.lang.ClassLoader.getSystemClassLoader());
+
+        	Class c = loader.loadClass("com.hexad.bluezime.donation.DonationObserver");
+        	Constructor cc = c.getDeclaredConstructor(Activity.class);
+        	
+        	m_donationObserver = cc.newInstance(this);
+        } catch (Exception ex) {
+        	inAppDonationsEnabled(false);
+        }
         
         m_helpButton.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				String url;
 				try {
-					url = "http://code.google.com/p/android-bluez-ime/";
+					String url =  "http://code.google.com/p/android-bluez-ime/";
 					Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
 				    startActivity( browse );			
 				} catch (Exception e) {
@@ -82,7 +106,23 @@ public class BluezIMESettings extends PreferenceActivity {
 				return false;
 			}
 		});
-        
+
+        m_donateButton.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				if (newValue instanceof String && ((String)newValue).equals("PAYPAL"))
+				{
+					try {
+						String url = "https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=paypal%40hexad%2edk&item_name=BluezIME%20Donation&no_shipping=2&no_note=1&tax=0&currency_code=EUR&bn=PP%2dDonationsBF&charset=UTF%2d8";
+						Intent browse = new Intent( Intent.ACTION_VIEW , Uri.parse( url ) );
+					    startActivity( browse );			
+					} catch (Exception e) {
+					}
+				}
+				return false;
+			}
+		});
+
         BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
         if (blue == null)
         {
@@ -227,6 +267,30 @@ public class BluezIMESettings extends PreferenceActivity {
     		m_prefs.setSelectedDevice(device.getName(), device.getAddress());
     	}
     }
+    
+    public void updateDonationState(String itemid) {
+    	
+    	try {
+    		int purchased = Integer.parseInt(itemid.substring(itemid.indexOf("_") + 1));
+    		m_prefs.setDonatedAmount(m_prefs.getDonatedAmount() + purchased);
+    	} catch (Exception ex) {
+    	}
+    	
+    	//Update the display
+    	inAppDonationsEnabled(true);
+    }
+    
+    public void inAppDonationsEnabled(boolean enabled) {
+    	if (m_prefs.getDonatedAmount() > 0) {
+	    	m_donateButton.setTitle(R.string.preferencelist_donate_short_donated);
+	    	m_donateButton.setSummary(String.format(this.getString(R.string.preferencelist_donate_long_donated), m_prefs.getDonatedAmount()));
+    	} else {
+	    	m_donateButton.setTitle(R.string.preferencelist_donate_short);
+	    	m_donateButton.setSummary(R.string.preferencelist_donate_long);
+    	}
+    }
+    
+    public ListPreference getDonateButton() { return m_donateButton; }
     
     private void enumerateBondedDevices() {
     	Set<BluetoothDevice> pairedDevices = BluetoothAdapter.getDefaultAdapter().getBondedDevices();

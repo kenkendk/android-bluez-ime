@@ -74,6 +74,9 @@ public class ButtonConfiguration extends PreferenceActivity {
 		} else if (driver.equals(iControlPadReader.DRIVER_NAME)) {
 			buttonCodes = iControlPadReader.getButtonCodes();
 			buttonNames = iControlPadReader.getButtonNames();
+		} else if (driver.equals(WiimoteReader.DRIVER_NAME)) {
+			buttonCodes = WiimoteReader.getButtonCodes();
+			buttonNames = WiimoteReader.getButtonNames();
 		} else {
 			buttonCodes = new int[0];
 			buttonNames = new int[0];

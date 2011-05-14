@@ -31,6 +31,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DRIVER_NAME, 
 		PhonejoyReader.DRIVER_NAME,
 		iControlPadReader.DRIVER_NAME,
+		WiimoteReader.DRIVER_NAME,
 		DataDumpReader.DRIVER_NAME
 	};
 	
@@ -39,6 +40,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DISPLAY_NAME, 
 		PhonejoyReader.DISPLAY_NAME,
 		iControlPadReader.DISPLAY_NAME,
+		WiimoteReader.DISPLAY_NAME,
 		DataDumpReader.DISPLAY_NAME
 	};
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
@@ -51,6 +53,10 @@ public class BluezService extends IntentService {
 	public static final String EVENT_DIRECTIONALCHANGE = "com.hexad.bluezime.directionalchange";
 	public static final String EVENT_DIRECTIONALCHANGE_DIRECTION = "direction";
 	public static final String EVENT_DIRECTIONALCHANGE_VALUE = "value";
+
+	public static final String EVENT_ACCELEROMETERCHANGE = "com.hexad.bluezime.accelerometerchange";
+	public static final String EVENT_ACCELEROMETERCHANGE_AXIS = "axis";
+	public static final String EVENT_ACCELEROMETERCHANGE_VALUE = "value";
 
 	public static final String EVENT_CONNECTING = "com.hexad.bluezime.connecting";
 	public static final String EVENT_CONNECTING_ADDRESS = "address";
@@ -78,6 +84,13 @@ public class BluezService extends IntentService {
 	public static final String EVENT_REPORTSTATE_DEVICENAME = "devicename";
 	public static final String EVENT_REPORTSTATE_DISPLAYNAME = "displayname";
 	public static final String EVENT_REPORTSTATE_DRIVERNAME = "drivername";
+	
+	//The service caller can also activate these, but they are not used by Bluez-IME (= Not tested!)
+	public static final String REQUEST_FEATURECHANGE = "com.hexad.bluezime.featurechange";
+	public static final String REQUEST_FEATURECHANGE_RUMBLE = "rumble"; //Boolean true=on, false=off
+	public static final String REQUEST_FEATURECHANGE_LEDID = "ledid"; //Integer LED to used 1-4 for Wiimote
+	public static final String REQUEST_FEATURECHANGE_ACCELEROMETER = "accelerometer"; //Boolean true=on, false=off
+
 	
 	private static final String LOG_NAME = "BluezService";
 	private final Binder binder = new LocalBinder();
@@ -123,6 +136,32 @@ public class BluezService extends IntentService {
 			connectToDevice(address, driver);
 		} else if (intent.getAction().equals(REQUEST_DISCONNECT)) {
 			disconnectFromDevice();
+		} else if (intent.getAction().equals(REQUEST_FEATURECHANGE)) {
+			try 
+			{
+				//NOTE: Not tested!
+				
+				if (intent.hasExtra(REQUEST_FEATURECHANGE_RUMBLE)) {
+					if (m_reader != null && m_reader instanceof WiimoteReader) {
+						((WiimoteReader)m_reader).request_SetRumble(intent.getBooleanExtra(REQUEST_FEATURECHANGE_RUMBLE, false));
+					}
+				}
+
+				if (intent.hasExtra(REQUEST_FEATURECHANGE_ACCELEROMETER)) {
+					if (m_reader != null && m_reader instanceof WiimoteReader) {
+						((WiimoteReader)m_reader).request_UseAccelerometer(intent.getBooleanExtra(REQUEST_FEATURECHANGE_ACCELEROMETER, false));
+					}
+				}
+
+				if (intent.hasExtra(REQUEST_FEATURECHANGE_LEDID)) {
+					if (m_reader != null && m_reader instanceof WiimoteReader) {
+						int led = intent.getIntExtra(REQUEST_FEATURECHANGE_LEDID, 1);
+						((WiimoteReader)m_reader).request_SetLEDState(led == 1, led == 2, led == 3, led ==4);
+					}
+				}
+			} catch (Exception ex) {
+				notifyError(ex);
+			}
 		} else if (intent.getAction().equals(REQUEST_STATE)) {
 			Intent i = new Intent(EVENT_REPORTSTATE);
 			
@@ -200,6 +239,8 @@ public class BluezService extends IntentService {
 				m_reader = new DataDumpReader(address, getApplicationContext());
 			else if (driver.toLowerCase().equals(iControlPadReader.DRIVER_NAME.toLowerCase()))
 				m_reader = new iControlPadReader(address, getApplicationContext());
+			else if (driver.toLowerCase().equals(WiimoteReader.DRIVER_NAME.toLowerCase()))
+				m_reader = new WiimoteReader(address, getApplicationContext());
 			else
 				throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 			

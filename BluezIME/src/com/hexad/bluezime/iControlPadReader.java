@@ -19,15 +19,11 @@
 package com.hexad.bluezime;
 
 import java.io.OutputStream;
-import java.lang.reflect.Method;
-
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 import android.view.KeyEvent;
 
-public class iControlPadReader extends BluetoothReader {
+public class iControlPadReader extends RfcommReader {
 
 	private static final boolean D = false;
 	
@@ -167,9 +163,8 @@ public class iControlPadReader extends BluetoothReader {
 					m_context.sendBroadcast(keypressBroadcast);
 				}
 			}
-			v = v >> 1;
+			v = v >>> 1;
 		}
-		
 	}
 	
 	@Override
@@ -200,10 +195,8 @@ public class iControlPadReader extends BluetoothReader {
 	}
 	
 	@Override
-	protected int setupConnection(BluetoothDevice device, byte[] readBuffer) throws Exception {
-    	//Reflection method, works on HTC desire
-		Method insecure = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] { int.class });
-        m_socket = (BluetoothSocket)insecure.invoke(device, Integer.valueOf(1));
+	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
+        m_socket = device.createInsecureRfcommSocket(1);
         m_socket.connect();
 
         if (D) Log.d(getDriverName(), "Connected to " + m_address);

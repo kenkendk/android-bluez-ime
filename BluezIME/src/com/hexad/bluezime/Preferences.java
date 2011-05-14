@@ -27,7 +27,8 @@ import android.preference.PreferenceManager;
 public class Preferences {
 	
 	public static final String PREFERENCES_UPDATED = "com.hexad.bluezime.preferenceschanged";
-	
+
+	private static final String PREF_DONATION_AMOUNT = "donation amount";
 	private static final String PREF_DEVICE_NAME = "device name";
 	private static final String PREF_DEVICE_ADDRESS = "device address";
 	private static final String PREF_DRIVER_NAME = "driver name";
@@ -137,4 +138,14 @@ public class Preferences {
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 	
+	public int getDonatedAmount() {
+		return m_prefs.getInt(PREF_DONATION_AMOUNT, 0);
+	}
+
+	public void setDonatedAmount(int amount) {
+		Editor e = m_prefs.edit();
+		e.putInt(PREF_DONATION_AMOUNT, amount);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
 }

@@ -17,14 +17,11 @@
 */
 package com.hexad.bluezime;
 
-import java.lang.reflect.Method;
-
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.util.Log;
 
-public class DataDumpReader extends BluetoothReader {
+public class DataDumpReader extends RfcommReader {
 
 	private static final String LOG_NAME = "DataDumpReader";
 	public static final String DRIVER_NAME = "dump";
@@ -40,9 +37,7 @@ public class DataDumpReader extends BluetoothReader {
 	}
 
 	@Override
-	protected int setupConnection(BluetoothDevice device, byte[] readBuffer) throws Exception {
-    	//Reflection method, works on HTC desire
-		
+	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
 		String connectionType = "?";
 		
 		for(int port = 0; port < 31; port++) {
@@ -51,9 +46,8 @@ public class DataDumpReader extends BluetoothReader {
 			try {
 				connectionType = "Secure";
 				Log.d(LOG_NAME, "Attempting createRfcommSocket");
-		    	Method secure = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
 		
-		    	BluetoothSocket s = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+		    	BluetoothSocket s = device.createRfcommSocket(port);
 		        s.connect();
 		        
 		        m_socket = s;
@@ -63,9 +57,8 @@ public class DataDumpReader extends BluetoothReader {
 				try {
 					connectionType = "Insecure";
 					Log.d(LOG_NAME, "Attempting createInsecureRfcommSocket");
-			    	Method secure = device.getClass().getMethod("createInsecureRfcommSocket", new Class[] { int.class });
 			    	
-			    	BluetoothSocket s = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+			    	BluetoothSocket s = device.createInsecureRfcommSocket(port);
 			        s.connect();
 			        
 			        m_socket = s;
@@ -82,9 +75,7 @@ public class DataDumpReader extends BluetoothReader {
 		}
 		
 		if (m_socket == null) {
-	    	Method secure = device.getClass().getMethod("createRfcommSocket", new Class[] { int.class });
-			
-	    	m_socket = (BluetoothSocket)secure.invoke(device, Integer.valueOf(1));
+	    	m_socket = device.createRfcommSocket(1);
 	        m_socket.connect();
 		}
 			

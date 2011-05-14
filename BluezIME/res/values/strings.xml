@@ -43,9 +43,11 @@
 <string name="preferencelist_configure_keys_short">Configure key mapping</string>
 <string name="preferencelist_configure_keys_long">Optionally select what each button should do</string>
 
-<string name="preference_help_short">Help / Donate / More</string>
+<string name="preference_help_short">Help / Support / More</string>
 <string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>
 <string name="preference_device_unknown">Unknown device selected</string>
+
+<string name="preference_use_paypal">Donate with PayPal</string>
 
 <string name="error_bluetooth_off">Bluetooth is currently turned off</string>
 
@@ -122,5 +124,50 @@
 <string name="icp_rightnub_down">Right Nub Down</string>
 <string name="icp_rightnub_left">Right Nub Left</string>
 <string name="icp_rightnub_right">Right Nub Right</string>
+
+<string name="preferencelist_donate_short">Support this app!</string>
+<string name="preferencelist_donate_long">Click here to donate a small amount</string>
+
+<string name="preferencelist_donate_short_donated">Thank you for donating!</string>
+<string name="preferencelist_donate_long_donated">You have donated: %s €</string>
+
+
+<string name="wiimote_dpad_left">Dpad Left</string>
+<string name="wiimote_dpad_right">Dpad Right</string>
+<string name="wiimote_dpad_up">Dpad Up</string>
+<string name="wiimote_dpad_down">Dpad Down</string>
+
+<string name="wiimote_core_a">Button A</string>
+<string name="wiimote_core_b">Button B</string>
+<string name="wiimote_core_1">Button 1</string>
+<string name="wiimote_core_2">Button 2</string>
+
+<string name="wiimote_plus">Button +</string>
+<string name="wiimote_minus">Button -</string>
+<string name="wiimote_home">Home Button</string>
+
+<string name="wiimote_classic_a">Classic Button A</string>
+<string name="wiimote_classic_b">Classic Button B</string>
+<string name="wiimote_classic_x">Classic Button X</string>
+<string name="wiimote_classic_y">Classic Button Y</string>
+
+<string name="wiimote_classic_l1">Classic Button L1</string>
+<string name="wiimote_classic_r1">Classic Button R1</string>
+<string name="wiimote_classic_l2">Classic Button L2</string>
+<string name="wiimote_classic_r2">Classic Button R2</string>
+
+<string name="wiimote_thumb1_left">Left Thumbstick Left</string>
+<string name="wiimote_thumb1_right">Left Thumbstick Right</string>
+<string name="wiimote_thumb1_up">Left Thumbstick Up</string>
+<string name="wiimote_thumb1_down">Left Thumbstick Down</string>
+
+<string name="wiimote_thumb2_left">Right Thumbstick Left</string>
+<string name="wiimote_thumb2_right">Right Thumbstick Right</string>
+<string name="wiimote_thumb2_up">Right Thumbstick Up</string>
+<string name="wiimote_thumb2_down">Right Thumbstick Down</string>
+
+<string name="wiimote_nunchuck_c">Nunchuck Button C</string>
+<string name="wiimote_nunchuck_z">Nunchuck Button Z</string>
+
 
 </resources>
