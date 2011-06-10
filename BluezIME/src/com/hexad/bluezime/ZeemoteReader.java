@@ -17,10 +17,16 @@
 */
 package com.hexad.bluezime;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.UUID;
+
 import android.content.Context;
+import android.util.Log;
 import android.view.KeyEvent;
 
 public class ZeemoteReader extends RfcommReader {
+	
+	private static final boolean D = false;
 	
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
@@ -168,6 +174,27 @@ public class ZeemoteReader extends RfcommReader {
 		}
 		
 		return remaining;
+	}
+	
+	@Override
+	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
+		try {
+			//Most devices supports using the reflection method
+			return super.setupConnection(device, readBuffer);
+		} catch (InvocationTargetException tex) {
+
+			Log.e(getDriverName(), "TargetInvocation cause: " + (tex.getCause() == null ? "" : tex.getCause().toString()));
+			Log.e(getDriverName(), "TargetInvocation target: " + (tex.getTargetException() == null ? "" : tex.getTargetException().toString()));
+			
+			//In case the required method was not present, we try the correct method
+	        m_socket = device.createRfcommSocketToServiceRecord(UUID.fromString("8e1f0cf7-508f-4875-b62c-fbb67fd34812"));
+	        m_socket.connect();
+
+	        if (D) Log.d(getDriverName(), "Connected to " + m_address);
+	    	
+	    	m_input = m_socket.getInputStream();
+	    	return m_input.read(readBuffer);		
+		}
 	}
 	
 	@Override
