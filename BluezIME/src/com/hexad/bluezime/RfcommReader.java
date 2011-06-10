@@ -188,10 +188,15 @@ public abstract class RfcommReader implements BluezDriverInterface {
         
         while (m_isRunning) {
         	try {
+    			if (D) Log.e(LOG_NAME + getDriverName(), "Buffer before read(" + unparsed + "): " + getHexString(buffer, 0, buffer.length));
+        		
         		read = m_input.read(buffer, unparsed, buffer.length - unparsed);
         		errors = 0;
-        		
-        		unparsed = parseInputData(buffer, read + unparsed);
+
+    			if (D) Log.e(LOG_NAME + getDriverName(), "Buffer after read(" + read + " + " + unparsed + "): " + getHexString(buffer, 0, buffer.length));
+
+    			read += unparsed;
+        		unparsed = parseInputData(buffer, read);
         		if (unparsed < 0)
         			unparsed = 0;
         		
@@ -203,8 +208,14 @@ public abstract class RfcommReader implements BluezDriverInterface {
         		
         		//Copy the remaining data back to the beginning of the buffer 
         		// to emulate a sliding window buffer
-        		if (unparsed > 0) {
+        		if (unparsed > 0 && read != unparsed) {
+        			if (D) Log.e(LOG_NAME + getDriverName(), "Sliding array before: " + getHexString(buffer, 0, buffer.length));
+        			
+        			if (D) Log.e(LOG_NAME + getDriverName(), "Sliding array params, read: " + read + ", unparsed: " + unparsed);
+        			
         			System.arraycopy(buffer, read - unparsed, buffer, 0, unparsed);
+        			
+        			if (D) Log.e(LOG_NAME + getDriverName(), "Sliding array after: " + getHexString(buffer, 0, buffer.length));
         		}
         		
         	} catch (Exception ex) {

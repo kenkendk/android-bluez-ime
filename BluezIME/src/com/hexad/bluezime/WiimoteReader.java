@@ -26,12 +26,12 @@ import android.view.KeyEvent;
 
 public class WiimoteReader extends HIDReaderBase {
 
-	private static final boolean D = true; //General debug info
+	private static final boolean D = false; //General debug info
 	private static final boolean D2 = false; //Detailed (packages) debug info
 	private static final boolean D3 = false; //Classic Controller debug info
 	
 	public static final String DRIVER_NAME = "wiimote";
-	public static final String DISPLAY_NAME = "Wiimote";
+	public static final String DISPLAY_NAME = "Wiimote (some firmwares)";
 
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
