@@ -136,6 +136,7 @@ public class BluezIMESettings extends PreferenceActivity {
         	
         	m_pairedDevices.setEnabled(false);
         	m_drivers.setEnabled(false);
+        	m_configureButton.setEnabled(false);
         	
         	AlertDialog dlg = new AlertDialog.Builder(this).create();
         	dlg.setMessage(this.getString(R.string.bluetooth_unsupported));
