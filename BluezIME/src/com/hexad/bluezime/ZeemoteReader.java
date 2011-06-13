@@ -184,9 +184,9 @@ public class ZeemoteReader extends RfcommReader {
 			return super.setupConnection(device, readBuffer);
 		} catch (Exception ex) {
 
-			if (D) Log.d(getDriverName(), "Relection connect failed, error: " + ex.getMessage());
+			if (D) Log.d(getDriverName(), "Reflection connect failed, error: " + ex.getMessage());
 
-			if (ex instanceof InvocationTargetException) {
+			if (D && ex instanceof InvocationTargetException) {
 				InvocationTargetException tex = (InvocationTargetException)ex;
 				Log.e(getDriverName(), "TargetInvocation cause: " + (tex.getCause() == null ? "<null>" : tex.getCause().toString()));
 				Log.e(getDriverName(), "TargetInvocation target: " + (tex.getTargetException() == null ? "<null>" : tex.getTargetException().toString()));
