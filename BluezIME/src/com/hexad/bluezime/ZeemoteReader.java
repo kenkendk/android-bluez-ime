@@ -180,20 +180,37 @@ public class ZeemoteReader extends RfcommReader {
 	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
 		try {
 			//Most devices supports using the reflection method
+			if (D) Log.d(getDriverName(), "Attempting reflection connect");
 			return super.setupConnection(device, readBuffer);
-		} catch (InvocationTargetException tex) {
+		} catch (Exception ex) {
 
-			Log.e(getDriverName(), "TargetInvocation cause: " + (tex.getCause() == null ? "" : tex.getCause().toString()));
-			Log.e(getDriverName(), "TargetInvocation target: " + (tex.getTargetException() == null ? "" : tex.getTargetException().toString()));
+			if (D) Log.d(getDriverName(), "Relection connect failed, error: " + ex.getMessage());
+
+			if (ex instanceof InvocationTargetException) {
+				InvocationTargetException tex = (InvocationTargetException)ex;
+				Log.e(getDriverName(), "TargetInvocation cause: " + (tex.getCause() == null ? "<null>" : tex.getCause().toString()));
+				Log.e(getDriverName(), "TargetInvocation target: " + (tex.getTargetException() == null ? "<null>" : tex.getTargetException().toString()));
+			}
+
+			try {
+				if (D) Log.d(getDriverName(), "Attempting createRfcommSocketToServiceRecord connect");
+
+				//In case the reflection method was not present, we try the correct method
+		        m_socket = device.createRfcommSocketToServiceRecord(UUID.fromString("8e1f0cf7-508f-4875-b62c-fbb67fd34812"));
+		        m_socket.connect();
+
+		        if (D) Log.d(getDriverName(), "Connected with createRfcommSocketToServiceRecord() to " + m_address);
+		    	
+		    	m_input = m_socket.getInputStream();
+		    	return m_input.read(readBuffer);
+		    	
+			} catch (Exception ex2) {
+				if (D) Log.e(getDriverName(), "Failed on createRfcommSocketToServiceRecord: " + ex2.getMessage());
+				
+				//Report the original error, not the secondary
+				throw ex;
+			}
 			
-			//In case the required method was not present, we try the correct method
-	        m_socket = device.createRfcommSocketToServiceRecord(UUID.fromString("8e1f0cf7-508f-4875-b62c-fbb67fd34812"));
-	        m_socket.connect();
-
-	        if (D) Log.d(getDriverName(), "Connected to " + m_address);
-	    	
-	    	m_input = m_socket.getInputStream();
-	    	return m_input.read(readBuffer);		
 		}
 	}
 	
