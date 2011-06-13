@@ -118,7 +118,7 @@ public class WiimoteReader extends HIDReaderBase {
 	//Emulated keypress values for classic thumbsticks
 	private static final int[] CLASSIC_ANALOG_KEYS = new int[] {
 		KeyEvent.KEYCODE_D, 		//Classic, Left stick right
-		KeyEvent.KEYCODE_A, 		//Classic, Left stick left
+		KeyEvent.KEYCODE_Q, 		//Classic, Left stick left
 		KeyEvent.KEYCODE_W, 		//Classic, Left stick up
 		KeyEvent.KEYCODE_S, 		//Classic, Left stick down
 		KeyEvent.KEYCODE_6, 		//Classic, Right stick right
@@ -144,7 +144,7 @@ public class WiimoteReader extends HIDReaderBase {
 	//Emulated keypress values for nunchuck thumbsticks
 	private static final int[] NUNCHUCK_ANALOG_KEYS = new int[] {	
 		KeyEvent.KEYCODE_D, 		//Nunchuck, Thumbstick right
-		KeyEvent.KEYCODE_A, 		//Nunchuck, Thumbstick lef
+		KeyEvent.KEYCODE_Q, 		//Nunchuck, Thumbstick lef
 		KeyEvent.KEYCODE_W, 		//Nunchuck, Thumbstick up
 		KeyEvent.KEYCODE_S, 		//Nunchuck, Thumbstick down
 	};
@@ -817,7 +817,7 @@ public class WiimoteReader extends HIDReaderBase {
 				KEYCODE_BUTTON_L1, KEYCODE_BUTTON_R1, KEYCODE_BUTTON_L2, KEYCODE_BUTTON_R2,
 				
 				//Nunchuck/classic thumbstick keys
-				KeyEvent.KEYCODE_W, KeyEvent.KEYCODE_A, KeyEvent.KEYCODE_S, KeyEvent.KEYCODE_D,
+				KeyEvent.KEYCODE_W, KeyEvent.KEYCODE_Q, KeyEvent.KEYCODE_S, KeyEvent.KEYCODE_D,
 				KeyEvent.KEYCODE_8, KeyEvent.KEYCODE_4, KeyEvent.KEYCODE_5, KeyEvent.KEYCODE_6,
 				
 				//Nunchuck buttons
