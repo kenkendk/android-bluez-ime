@@ -129,45 +129,73 @@ public class BGP100Reader extends RfcommReader {
 
 			//If the high bit is set in byte 0 and not in byte 1, we accept it
 			if (((data[offset] & 0x80) != 0) && ((data[offset + 1] & 0x80) == 0)) {
-				int value = (data[offset] & 0xff) << 8 | (data[offset + 1] & 0xff);
 				
-				if (_lookup.containsKey(value)) {
+				//TODO: This is actually for Phonejoy, not BGP100
+				if ((data[offset] & 0xff) == 0xff) {
 					
-					KeyEvent e = _lookup.get(value);
+					//Make sure we have the next byte as well
+					if (remaining < 3)
+						return remaining;
 					
-					if (D) Log.w(getDriverName(), "Sending button event, button: " + e.getKeyCode() + ", direction: " + (e.getAction() == KeyEvent.ACTION_DOWN ? "DOWN" : "UP"));
-					
-					if (D2) {
-						if (_keyStates.containsKey(e.getKeyCode())) {
-							boolean oldState = _keyStates.get(e.getKeyCode());
-							boolean newState = e.getAction() == KeyEvent.ACTION_DOWN; 
-							
-							if (oldState == newState)
-								Log.w(getDriverName(), "Probably a bug, got a new event, but the state was not changed? KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
-							else
-								Log.d(getDriverName(), "Changed state for KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
-							
-							_keyStates.remove(e.getKeyCode());
-							_keyStates.put(e.getKeyCode(), newState);
-							
-						} else {
-							Log.e(getDriverName(), "Bug in logging, the key was found, but then not? KeyCode:" + e.getKeyCode());
-						}
-							
+					int axis = (data[offset + 1] & 0xff) - 0x11;
+					if (axis >= 0 && axis < 4) {
+						int axis_value = data[offset + 2] & 0xff;
+						int normalized = Math.max(-127, Math.min(127, (axis_value - 127)));
+						
+						if (D) Log.d(getDriverName(), "Axis " + axis + " changed to " + normalized + " (" + axis_value + ")");
+						
+						directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_DIRECTION, axis);
+						directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_VALUE, normalized);
+						m_context.sendBroadcast(directionBroadcast);
+						
+					} else {
+						if (D) Log.w(getDriverName(), "Unexpected axis: " + axis + ", raw value: " + data[offset + 1]);
 					}
 					
-					
-					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, e.getAction());
-					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, e.getKeyCode());
-					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
-					m_context.sendBroadcast(keypressBroadcast);
+					offset += 3;
+					remaining -= 3;
 					
 				} else {
-					if (D) Log.w(getDriverName(), "Unmatched button press: " + getHexString(data, offset, 2) + ", full block: " + getHexString(data, 0, data.length));
+					int value = (data[offset] & 0xff) << 8 | (data[offset + 1] & 0xff);
+					
+					if (_lookup.containsKey(value)) {
+						
+						KeyEvent e = _lookup.get(value);
+						
+						if (D) Log.w(getDriverName(), "Sending button event, button: " + e.getKeyCode() + ", direction: " + (e.getAction() == KeyEvent.ACTION_DOWN ? "DOWN" : "UP"));
+						
+						if (D2) {
+							if (_keyStates.containsKey(e.getKeyCode())) {
+								boolean oldState = _keyStates.get(e.getKeyCode());
+								boolean newState = e.getAction() == KeyEvent.ACTION_DOWN; 
+								
+								if (oldState == newState)
+									Log.w(getDriverName(), "Probably a bug, got a new event, but the state was not changed? KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
+								else
+									Log.d(getDriverName(), "Changed state for KeyCode: " + e.getKeyCode() + ", direction: " + (newState ? "DOWN" : "UP"));
+								
+								_keyStates.remove(e.getKeyCode());
+								_keyStates.put(e.getKeyCode(), newState);
+								
+							} else {
+								Log.e(getDriverName(), "Bug in logging, the key was found, but then not? KeyCode:" + e.getKeyCode());
+							}
+								
+						}
+						
+						
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, e.getAction());
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, e.getKeyCode());
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
+						m_context.sendBroadcast(keypressBroadcast);
+
+					} else {
+						if (D) Log.w(getDriverName(), "Unmatched button press: " + getHexString(data, offset, 2) + ", full block: " + getHexString(data, 0, data.length));
+					}
+					
+					offset += 2;
+					remaining -= 2;
 				}
-				
-				offset += 2;
-				remaining -= 2;
 			} else {
 				if (D) Log.w(getDriverName(), "Umatched byte #" + offset + " in: " + getHexString(data, 0, read));
 				offset++;

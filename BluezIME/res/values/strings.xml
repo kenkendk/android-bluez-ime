@@ -93,11 +93,22 @@
 <string name="bgp100_dpad_up">Dpad Up</string>
 <string name="bgp100_dpad_down">Dpad Down</string>
 
-<string name="joyphone_button_select">Select Button</string>
-<string name="joyphone_button_l1">Button L1</string>
-<string name="joyphone_button_r1">Button R1</string>
-<string name="joyphone_button_l2">Button L2</string>
-<string name="joyphone_button_r2">Button R2</string>
+<string name="phonejoy_button_select">Select Button</string>
+<string name="phonejoy_button_l1">Button L1</string>
+<string name="phonejoy_button_r1">Button R1</string>
+<string name="phonejoy_button_l2">Button L2</string>
+<string name="phonejoy_button_r2">Button R2</string>
+
+<string name="phonejoy_analog_left_up">Left analog, Up</string>
+<string name="phonejoy_analog_left_down">Left analog, Down</string>
+<string name="phonejoy_analog_left_left">Left analog, Left</string>
+<string name="phonejoy_analog_left_right">Left analog, Right</string>
+
+<string name="phonejoy_analog_right_up">Right analog, Up</string>
+<string name="phonejoy_analog_right_down">Right analog, Down</string>
+<string name="phonejoy_analog_right_left">Right analog, Left</string>
+<string name="phonejoy_analog_right_right">Right analog, Right</string>
+
 
 <string name="icp_button_left">Dpad Left</string>
 <string name="icp_button_right">Dpad Right</string>
