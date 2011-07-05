@@ -69,8 +69,8 @@ public class ZeemoteReader extends RfcommReader {
 	//This is the reason we only support 4 directions (and my device only has 4)
 	private static final int[] m_directionKeyCodes = new int[] { KeyEvent.KEYCODE_DPAD_RIGHT, KeyEvent.KEYCODE_DPAD_LEFT, KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_DPAD_UP }; 
 	
-	public ZeemoteReader(String address, Context context) throws Exception {
-		super(address, context);
+	public ZeemoteReader(String address, String sessionId, Context context) throws Exception {
+		super(address, sessionId, context);
 	}
 	
 	@Override

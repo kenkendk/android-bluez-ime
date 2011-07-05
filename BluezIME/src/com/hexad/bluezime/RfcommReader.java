@@ -37,6 +37,7 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	protected Context m_context = null;
 	protected String m_address = null;
 	protected String m_name = null;
+	protected String m_sessionId = null;
 
 	protected Intent errorBroadcast = new Intent(BluezService.EVENT_ERROR);
 	protected Intent connectedBroadcast = new Intent(BluezService.EVENT_CONNECTED);
@@ -50,15 +51,24 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	//private static final UUID HID_UUID = UUID.fromString("00001124-0000-1000-8000-00805f9b34fb");
 	//private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 	
-	public RfcommReader(String address, Context context) throws Exception {
-		this(address, context, true);
+	public RfcommReader(String address, String sessionId, Context context) throws Exception {
+		this(address, sessionId, context, true);
 	}
 
-	protected RfcommReader(String address, Context context, boolean connect) throws Exception {
+	protected RfcommReader(String address, String sessionId, Context context, boolean connect) throws Exception {
 		try
 		{
 			m_context = context;
 			m_address = address;
+			m_sessionId = sessionId;
+			
+			errorBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			connectedBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			disconnectedBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			keypressBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			directionBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			accelerometerBroadcast.putExtra(BluezService.SESSION_ID, m_sessionId);
+			
 			BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
 			if (blue == null)
 				throw new Exception(m_context.getString(R.string.bluetooth_unsupported));

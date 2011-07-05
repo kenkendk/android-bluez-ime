@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
@@ -37,15 +38,60 @@ import android.view.KeyEvent;
 public class ButtonConfiguration extends PreferenceActivity {
 
 	private Preferences m_prefs;
+	private ListPreference m_presets;
+	private EditTextPreference m_presetName;
 	private Hashtable<Integer, String> m_name_lookup;
 	private Hashtable<Preference, Integer> m_list_lookup;
 
+	public class AndroidNewKeys {
+		//These are from API level 9
+		public static final int KEYCODE_BUTTON_A = 0x60;
+		public static final int KEYCODE_BUTTON_B = 0x61;
+		public static final int KEYCODE_BUTTON_C = 0x62;
+		public static final int KEYCODE_BUTTON_X = 0x63;
+		public static final int KEYCODE_BUTTON_Y = 0x64;
+		public static final int KEYCODE_BUTTON_Z = 0x65;
+		public static final int KEYCODE_BUTTON_L1 = 0x66;
+		public static final int KEYCODE_BUTTON_R1 = 0x67;
+		public static final int KEYCODE_BUTTON_L2 = 0x68;
+		public static final int KEYCODE_BUTTON_R2 = 0x69;
+		public static final int KEYCODE_BUTTON_START = 0x6c; 
+		public static final int KEYCODE_BUTTON_SELECT = 0x6d; 
+	}
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.buttonconfiguration);
 		
 		m_prefs = new Preferences(this);
+		
+		m_presets = (ListPreference)this.findPreference("select_preset");
+		m_presetName = (EditTextPreference)this.findPreference("rename_preset");
+		
+		m_presets.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				if (newValue instanceof String) {
+					m_prefs.setCurrentProfile((String)newValue);
+					return true;
+				} 
+				
+				return false;
+			}
+		});
+		
+		m_presetName.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				if (newValue instanceof String && !((String)newValue).equals("")) {
+					m_prefs.setProfileDisplayName((String)newValue);
+					return true;
+				} 
+				
+				return false;
+			}
+		});
 		
 		//Use reflection to build a list of possible keys we can send
 		m_name_lookup = new Hashtable<Integer, String>();
@@ -54,6 +100,17 @@ public class ButtonConfiguration extends PreferenceActivity {
 			if (name.startsWith("KEYCODE_"))
 				try {
 					m_name_lookup.put(f.getInt(null), name.substring("KEYCODE_".length()));
+				} catch (Exception e) {	}
+		}
+		
+		//Support for sane(r) names in Android < 2.3
+		for (Field f : AndroidNewKeys.class.getDeclaredFields()) {
+			String name = f.getName();
+			if (name.startsWith("KEYCODE_"))
+				try {
+					int keyCode = f.getInt(null);
+					if (!m_name_lookup.containsKey(keyCode))
+						m_name_lookup.put(keyCode, name.substring("KEYCODE_".length()));
 				} catch (Exception e) {	}
 		}
 		
@@ -141,14 +198,31 @@ public class ButtonConfiguration extends PreferenceActivity {
 	}
 	
 	private void updateDisplay() {
-		
-		for(Preference p : Collections.list(m_list_lookup.keys()))
-		{
+		for(Preference p : Collections.list(m_list_lookup.keys())) {
 			ListPreference lp = (ListPreference)p;
 			int code = m_prefs.getKeyMapping(m_list_lookup.get(p));
 			lp.setSummary(m_name_lookup.containsKey(code) ? m_name_lookup.get(code) : "UNKNOWN - 0x" + Integer.toHexString(code));	
 			lp.setValue(Integer.toString(code));
 		}
+		
+		CharSequence[] profileEntries = new CharSequence[Preferences.PROFILE_KEYS.length];
+		CharSequence[] profileEntryValues = new CharSequence[Preferences.PROFILE_KEYS.length];
+		for(int i = 0; i < profileEntries.length; i++) {
+			profileEntryValues[i] = Preferences.PROFILE_KEYS[i];
+			profileEntries[i] = m_prefs.getProfileDisplayName(Preferences.PROFILE_KEYS[i]);
+		}
+		
+		m_presets.setEntries(profileEntries);
+		m_presets.setEntryValues(profileEntryValues);
+		
+		String currentProfile = m_prefs.getCurrentProfile();
+		if (currentProfile.endsWith(":"))
+				currentProfile = currentProfile.substring(0, currentProfile.length() - 1);
+		m_presets.setValue(currentProfile);
+		
+		String display = m_prefs.getProfileDisplayName();
+		m_presets.setTitle(display);
+		m_presetName.setText(display);
 	}
 	
 	private BroadcastReceiver preferenceUpdateMonitor = new BroadcastReceiver() {

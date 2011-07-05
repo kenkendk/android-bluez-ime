@@ -26,6 +26,9 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
 	
+	public static final String[] PROFILE_NAMES = new String[] {"<default>", "Profile 2", "Profile 3", "Profile 4", "Profile 5" };
+	public static final String[] PROFILE_KEYS = new String[] {"", "Profile2", "Profile3", "Profile4", "Profile5" };
+	
 	public static final String PREFERENCES_UPDATED = "com.hexad.bluezime.preferenceschanged";
 
 	private static final String PREF_DONATION_AMOUNT = "donation amount";
@@ -34,6 +37,7 @@ public class Preferences {
 	private static final String PREF_DRIVER_NAME = "driver name";
 	private static final String PREF_KEY_MAPPING = "key mapping";
 	private static final String PREF_KEY_MAPPING_PROFILE = "key mapping profile";
+	private static final String PREF_PROFILE_NAME = "profile name";
 	
 	private SharedPreferences m_prefs;
 	private Context m_context;
@@ -44,34 +48,34 @@ public class Preferences {
 	}
 	
 	public String getSelectedDriverName() {
-		return m_prefs.getString(getCurrentProfile() + PREF_DRIVER_NAME, BluezService.DEFAULT_DRIVER_NAME);
+		return m_prefs.getString(PREF_DRIVER_NAME, BluezService.DEFAULT_DRIVER_NAME);
 	}
 	
 	public void setSelectedDriverName(String value) {
 		Editor e = m_prefs.edit();
-		e.putString(getCurrentProfile() + PREF_DRIVER_NAME, value);
+		e.putString(PREF_DRIVER_NAME, value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 
 	public String getSelectedDeviceName() {
-		return m_prefs.getString(getCurrentProfile() + PREF_DEVICE_NAME, null);
+		return m_prefs.getString(PREF_DEVICE_NAME, null);
 	}
 	
 	public void setSelectedDeviceName(String value) {
 		Editor e = m_prefs.edit();
-		e.putString(getCurrentProfile() + PREF_DEVICE_NAME, value);
+		e.putString(PREF_DEVICE_NAME, value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 
 	public String getSelectedDeviceAddress() {
-		return m_prefs.getString(getCurrentProfile() + PREF_DEVICE_ADDRESS, null);
+		return m_prefs.getString(PREF_DEVICE_ADDRESS, null);
 	}
 	
 	public void setSelectedDeviceAddress(String value) {
 		Editor e = m_prefs.edit();
-		e.putString(getCurrentProfile() + PREF_DEVICE_ADDRESS, value);
+		e.putString(PREF_DEVICE_ADDRESS, value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
@@ -148,4 +152,35 @@ public class Preferences {
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
+
+	public String getProfileDisplayName(String profilename) {
+		String profKey = profilename;
+		if (profKey.endsWith(":"))
+			profKey = profKey.substring(0, profKey.length() - 1);
+		
+		String defaultName = profKey;
+		for(int i = 0; i < PROFILE_KEYS.length; i++)
+			if (PROFILE_KEYS[i].equals(profKey)) {
+				defaultName = PROFILE_NAMES[i];
+				break;
+			}
+		
+		String res = m_prefs.getString(profKey + ":" + PREF_PROFILE_NAME, defaultName);
+		if (res == null || res.equals(""))
+			res = defaultName;
+		
+		return res;
+	}
+
+	public String getProfileDisplayName() {
+		return getProfileDisplayName(getCurrentProfile());
+	}
+	
+	public void setProfileDisplayName(String value) {
+		Editor e = m_prefs.edit();
+		e.putString(getCurrentProfile() + PREF_PROFILE_NAME, value);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+	
 }

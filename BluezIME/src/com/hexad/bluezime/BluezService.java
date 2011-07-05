@@ -17,9 +17,13 @@
 */
 package com.hexad.bluezime;
 
+import java.util.Dictionary;
+import java.util.Hashtable;
+
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -44,6 +48,8 @@ public class BluezService extends IntentService {
 		DataDumpReader.DISPLAY_NAME
 	};
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
+	
+	public static final String SESSION_ID = "com.hexad.bluezime.sessionid";
 	
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
 	public static final String EVENT_KEYPRESS_KEY = "key";
@@ -74,7 +80,7 @@ public class BluezService extends IntentService {
 	public static final String REQUEST_CONNECT = "com.hexad.bluezime.connect";
 	public static final String REQUEST_CONNECT_ADDRESS = "address";
 	public static final String REQUEST_CONNECT_DRIVER = "driver";
-	
+		
 	public static final String REQUEST_DISCONNECT = "com.hexad.bluezime.disconnect";
 	
 	public static final String REQUEST_STATE = "com.hexad.bluezime.getstate";
@@ -85,17 +91,25 @@ public class BluezService extends IntentService {
 	public static final String EVENT_REPORTSTATE_DISPLAYNAME = "displayname";
 	public static final String EVENT_REPORTSTATE_DRIVERNAME = "drivername";
 	
-	//The service caller can also activate these, but they are not used by Bluez-IME (= Not tested!)
+	//The service caller can also activate these, but they are not used by Bluez-IME (=> Not tested!)
 	public static final String REQUEST_FEATURECHANGE = "com.hexad.bluezime.featurechange";
-	public static final String REQUEST_FEATURECHANGE_RUMBLE = "rumble"; //Boolean true=on, false=off
-	public static final String REQUEST_FEATURECHANGE_LEDID = "ledid"; //Integer LED to used 1-4 for Wiimote
-	public static final String REQUEST_FEATURECHANGE_ACCELEROMETER = "accelerometer"; //Boolean true=on, false=off
+	public static final String REQUEST_FEATURECHANGE_RUMBLE = "rumble"; //Boolean, true=on, false=off
+	public static final String REQUEST_FEATURECHANGE_LEDID = "ledid"; //Integer, LED to use 1-4 for Wiimote
+	public static final String REQUEST_FEATURECHANGE_ACCELEROMETER = "accelerometer"; //Boolean, true=on, false=off
 
+	public static final String REQUEST_CONFIG = "com.hexad.bluezime.getconfig";
+	
+	public static final String EVENT_REPORT_CONFIG = "com.hexad.bluezime.config";
+	public static final String EVENT_REPORT_CONFIG_VERSION = "version";
+	public static final String EVENT_REPORT_CONFIG_DRIVER_NAMES = "drivernames";
+	public static final String EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES = "driverdisplaynames";
+	
 	
 	private static final String LOG_NAME = "BluezService";
 	private final Binder binder = new LocalBinder();
 	
-	private static BluezDriverInterface m_reader = null;
+	//private static BluezDriverInterface m_reader = null;
+	private static Hashtable<String, BluezDriverInterface> m_readers = new Hashtable<String, BluezDriverInterface>();
 	
 	public BluezService() {
 		super(LOG_NAME);
@@ -122,142 +136,192 @@ public class BluezService extends IntentService {
 		if (intent == null || intent.getAction() == null)
 			return;
 		
+		String sessionId = null;
+		if (intent.hasExtra(SESSION_ID))
+			sessionId = intent.getStringExtra(SESSION_ID);
+		
+		BluezDriverInterface reader = null;
+		synchronized (m_readers) {
+			if (sessionId != null && m_readers.containsKey(sessionId))
+				reader = m_readers.get(sessionId);
+		}
+
 		if (intent.getAction().equals(REQUEST_CONNECT)) {
-			Preferences p = new Preferences(this);
 			
-			String address = p.getSelectedDeviceAddress();
-			String driver = p.getSelectedDriverName();
+			String address = null;
+			String driver = null;
 			
 			if (intent.hasExtra(REQUEST_CONNECT_ADDRESS))
 				address = intent.getStringExtra(REQUEST_CONNECT_ADDRESS);
 			if (intent.hasExtra(REQUEST_CONNECT_DRIVER))
 				driver = intent.getStringExtra(REQUEST_CONNECT_DRIVER);
 			
-			connectToDevice(address, driver);
+			connectToDevice(address, driver, sessionId);
 		} else if (intent.getAction().equals(REQUEST_DISCONNECT)) {
-			disconnectFromDevice();
+			disconnectFromDevice(sessionId);
 		} else if (intent.getAction().equals(REQUEST_FEATURECHANGE)) {
 			try 
 			{
 				//NOTE: Not tested!
 				
 				if (intent.hasExtra(REQUEST_FEATURECHANGE_RUMBLE)) {
-					if (m_reader != null && m_reader instanceof WiimoteReader) {
-						((WiimoteReader)m_reader).request_SetRumble(intent.getBooleanExtra(REQUEST_FEATURECHANGE_RUMBLE, false));
+					if (reader != null && reader instanceof WiimoteReader) {
+						((WiimoteReader)reader).request_SetRumble(intent.getBooleanExtra(REQUEST_FEATURECHANGE_RUMBLE, false));
 					}
 				}
 
 				if (intent.hasExtra(REQUEST_FEATURECHANGE_ACCELEROMETER)) {
-					if (m_reader != null && m_reader instanceof WiimoteReader) {
-						((WiimoteReader)m_reader).request_UseAccelerometer(intent.getBooleanExtra(REQUEST_FEATURECHANGE_ACCELEROMETER, false));
+					if (reader != null && reader instanceof WiimoteReader) {
+						((WiimoteReader)reader).request_UseAccelerometer(intent.getBooleanExtra(REQUEST_FEATURECHANGE_ACCELEROMETER, false));
 					}
 				}
 
 				if (intent.hasExtra(REQUEST_FEATURECHANGE_LEDID)) {
-					if (m_reader != null && m_reader instanceof WiimoteReader) {
+					if (reader != null && reader instanceof WiimoteReader) {
 						int led = intent.getIntExtra(REQUEST_FEATURECHANGE_LEDID, 1);
-						((WiimoteReader)m_reader).request_SetLEDState(led == 1, led == 2, led == 3, led ==4);
+						((WiimoteReader)reader).request_SetLEDState(led == 1, led == 2, led == 3, led ==4);
 					}
 				}
 			} catch (Exception ex) {
-				notifyError(ex);
+				notifyError(ex, sessionId);
 			}
 		} else if (intent.getAction().equals(REQUEST_STATE)) {
 			Intent i = new Intent(EVENT_REPORTSTATE);
 			
 			synchronized (this) {
-				i.putExtra(EVENT_REPORTSTATE_CONNECTED, m_reader != null);
-				if (m_reader != null) {
-					i.putExtra(EVENT_REPORTSTATE_DEVICENAME, m_reader.getDeviceAddress());
-					i.putExtra(EVENT_REPORTSTATE_DISPLAYNAME, m_reader.getDeviceName());
-					i.putExtra(EVENT_REPORTSTATE_DRIVERNAME, m_reader.getDriverName());
+				i.putExtra(EVENT_REPORTSTATE_CONNECTED, reader != null);
+				i.putExtra(SESSION_ID, sessionId);
+				if (reader != null) {
+					i.putExtra(EVENT_REPORTSTATE_DEVICENAME, reader.getDeviceAddress());
+					i.putExtra(EVENT_REPORTSTATE_DISPLAYNAME, reader.getDeviceName());
+					i.putExtra(EVENT_REPORTSTATE_DRIVERNAME, reader.getDriverName());
 				}
 			}
 			
 			sendBroadcast(i);
+		} else if (intent.getAction().equals(REQUEST_CONFIG)) {
+			Intent i = new Intent(EVENT_REPORT_CONFIG);
+			
+			int version = 0;
+			try
+			{
+			    version = this.getPackageManager().getPackageInfo(this.getPackageName(), 0).versionCode;
+			}
+			catch (NameNotFoundException e)
+			{
+			    Log.w(LOG_NAME, e.getMessage());
+			}
+			
+			i.putExtra(SESSION_ID, sessionId);
+			i.putExtra(EVENT_REPORT_CONFIG_VERSION, version);
+			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_NAMES, BluezService.DRIVER_NAMES);
+			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES, BluezService.DRIVER_DISPLAYNAMES);
+			
+			sendBroadcast(i);
 		} else {
-			notifyError(new Exception(this.getString(R.string.bluetooth_unsupported)));
+			notifyError(new Exception(this.getString(R.string.bluetooth_unsupported)), sessionId);
 		}
 	}
 
-	private synchronized void disconnectFromDevice()
+	private synchronized void disconnectFromDevice(String sessionId)
 	{
 		String adr = "<null>"; 
 		try
 		{
-			if (m_reader != null) {
-				adr = m_reader.getDeviceAddress();
-				m_reader.stop();
+			BluezDriverInterface reader = null;
+			synchronized (m_readers) {
+				if (sessionId != null && m_readers.containsKey(sessionId))
+					reader = m_readers.get(sessionId);
+			}
+			
+			if (reader != null) {
+				adr = reader.getDeviceAddress();
+				reader.stop();
 			}
 		}
 		catch (Exception ex)
 		{
         	Log.e(LOG_NAME, "Error on disconnect from " + adr + ", message: " + ex.toString());
-        	notifyError(ex);
+        	notifyError(ex, sessionId);
 		}
 		finally
 		{
-			m_reader = null;
+			synchronized (m_readers) {
+				if (m_readers.containsKey(sessionId))
+					m_readers.remove(sessionId);
+			}
 		}
 	}
 	
-	private synchronized void connectToDevice(String address, String driver) {
+	private synchronized void connectToDevice(String address, String driver, String sessionId) {
 
 		try {
 			if (address == null || address.trim().length() == 0)
 				throw new Exception("Invalid call, no address specified");
 			if (driver == null || driver.trim().length() == 0)
 				throw new Exception("Invalid call, no driver specified");
+			if (sessionId == null || sessionId.trim().length() == 0)
+				throw new Exception("Invalid call, no session id specified");
 
-			if (m_reader != null)
-			{
-				if (m_reader.isRunning() && address.equals(m_reader.getDeviceAddress()) && driver.toLowerCase().equals(m_reader.getDriverName()))
-					return; //Already connected
-				
-				//Connect to other device, disconnect
-				disconnectFromDevice();
-			}
-			
 			BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
 			if (blue == null)
 				throw new Exception(this.getString(R.string.bluetooth_unsupported));
-
 			if (!blue.isEnabled())
 				throw new Exception(this.getString(R.string.error_bluetooth_off));
 
-			Intent connectingBroadcast = new Intent(EVENT_CONNECTING);
-			connectingBroadcast.putExtra(EVENT_CONNECTING_ADDRESS, address);
-			sendBroadcast(connectingBroadcast);
-
-			if (driver.toLowerCase().equals(ZeemoteReader.DRIVER_NAME.toLowerCase()))
-				m_reader = new ZeemoteReader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals(BGP100Reader.DRIVER_NAME.toLowerCase()))
-				m_reader = new BGP100Reader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals(PhonejoyReader.DRIVER_NAME.toLowerCase()))
-				m_reader = new PhonejoyReader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals(DataDumpReader.DRIVER_NAME.toLowerCase()))
-				m_reader = new DataDumpReader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals(iControlPadReader.DRIVER_NAME.toLowerCase()))
-				m_reader = new iControlPadReader(address, getApplicationContext());
-			else if (driver.toLowerCase().equals(WiimoteReader.DRIVER_NAME.toLowerCase()))
-				m_reader = new WiimoteReader(address, getApplicationContext());
-			else
-				throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
+			BluezDriverInterface reader = null;
 			
-			new Thread(m_reader).start();
+			synchronized (m_readers) {
+				if (m_readers.containsKey(sessionId))
+					reader = m_readers.get(sessionId);
+			
+				if (reader != null)
+				{
+					if (reader.isRunning() && address.equals(reader.getDeviceAddress()) && driver.toLowerCase().equals(reader.getDriverName()))
+						return; //Already connected
+					
+					//Connect to other device, disconnect
+					disconnectFromDevice(sessionId);
+				}
+				
+				Intent connectingBroadcast = new Intent(EVENT_CONNECTING);
+				connectingBroadcast.putExtra(EVENT_CONNECTING_ADDRESS, address);
+				connectingBroadcast.putExtra(SESSION_ID, sessionId);
+				sendBroadcast(connectingBroadcast);
+	
+				if (driver.toLowerCase().equals(ZeemoteReader.DRIVER_NAME.toLowerCase()))
+					reader = new ZeemoteReader(address, sessionId, getApplicationContext());
+				else if (driver.toLowerCase().equals(BGP100Reader.DRIVER_NAME.toLowerCase()))
+					reader = new BGP100Reader(address, sessionId, getApplicationContext());
+				else if (driver.toLowerCase().equals(PhonejoyReader.DRIVER_NAME.toLowerCase()))
+					reader = new PhonejoyReader(address, sessionId, getApplicationContext());
+				else if (driver.toLowerCase().equals(DataDumpReader.DRIVER_NAME.toLowerCase()))
+					reader = new DataDumpReader(address, sessionId, getApplicationContext());
+				else if (driver.toLowerCase().equals(iControlPadReader.DRIVER_NAME.toLowerCase()))
+					reader = new iControlPadReader(address, sessionId, getApplicationContext());
+				else if (driver.toLowerCase().equals(WiimoteReader.DRIVER_NAME.toLowerCase()))
+					reader = new WiimoteReader(address, sessionId, getApplicationContext());
+				else
+					throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
+				
+				m_readers.put(sessionId, reader);
+			}
+
+			new Thread(reader).start();
 		} catch (Exception ex) {
-			notifyError(ex);
+			notifyError(ex, sessionId);
 		}
 	}
 
-	private void notifyError(Exception ex) {
+	private void notifyError(Exception ex, String sessionId) {
 		Log.e(LOG_NAME, ex.toString());
 
 		Intent errorBroadcast = new Intent(EVENT_ERROR);
 		errorBroadcast.putExtra(EVENT_ERROR_SHORT, ex.getMessage());
 		errorBroadcast.putExtra(EVENT_ERROR_FULL, ex.toString());
+		errorBroadcast.putExtra(SESSION_ID, sessionId);
 		sendBroadcast(errorBroadcast);
 		
-		disconnectFromDevice();
+		disconnectFromDevice(sessionId);
 	}
 }

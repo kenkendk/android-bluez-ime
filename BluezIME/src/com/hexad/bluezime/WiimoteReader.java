@@ -288,8 +288,8 @@ public class WiimoteReader extends HIDReaderBase {
 		return results;
 	}
 	
-	public WiimoteReader(String address, Context context) throws Exception {
-		super(address, context);
+	public WiimoteReader(String address, String sessionId, Context context) throws Exception {
+		super(address, sessionId, context);
 
 		super.doConnect();
 	}

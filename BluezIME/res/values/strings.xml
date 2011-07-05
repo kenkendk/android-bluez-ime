@@ -63,6 +63,13 @@
 
 <string name="configuration_header1">Button configuration</string>
 <string name="configuration_header2">Reset configuration</string>
+<string name="configuration_header3">Select configuration</string>
+
+<string name="configuration_select_setup_short">Select configuration set</string>
+<string name="configuration_select_setup_long">Select the key profile</string>
+<string name="configuration_rename_setup_short">Rename profile</string>
+<string name="configuration_rename_setup_long">Click to rename the key profile</string>
+
 <string name="configuration_reset_short">Reset all to default</string>
 <string name="configuration_reset_long">Click here to return button mappings to their default</string>
 

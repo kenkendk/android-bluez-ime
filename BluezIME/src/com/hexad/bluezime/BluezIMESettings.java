@@ -17,7 +17,6 @@
 */
 package com.hexad.bluezime;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Set;

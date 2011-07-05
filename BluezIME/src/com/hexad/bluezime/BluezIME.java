@@ -35,6 +35,8 @@ import android.widget.Toast;
 
 public class BluezIME extends InputMethodService {
 
+	private static final String SESSION_ID = "BLUEZ-IME-KEYBOARD";
+	
 	private static final boolean D = false;
 	private static final String LOG_NAME = "BluezInput";
 	private boolean m_connected = false;
@@ -113,6 +115,7 @@ public class BluezIME extends InputMethodService {
 		i.setAction(BluezService.REQUEST_CONNECT);
 		i.putExtra(BluezService.REQUEST_CONNECT_ADDRESS, address);
 		i.putExtra(BluezService.REQUEST_CONNECT_DRIVER, driver);
+		i.putExtra(BluezService.SESSION_ID, SESSION_ID);
 		startService(i);
 	}
 	
@@ -135,6 +138,7 @@ public class BluezIME extends InputMethodService {
 			if (D) Log.d(LOG_NAME, "Disconnecting");
 			Intent i = new Intent(this, BluezService.class);
 			i.setAction(BluezService.REQUEST_DISCONNECT);
+			i.putExtra(BluezService.SESSION_ID, SESSION_ID);
 			startService(i);
 		}
 		
@@ -156,6 +160,10 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver connectingReceiver =  new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			String sid = intent.getStringExtra(BluezService.SESSION_ID);
+			if (sid == null || !sid.equals(SESSION_ID))
+				return;
+			
 			String address = intent.getStringExtra(BluezService.EVENT_CONNECTING_ADDRESS);
 			setNotificationText(String.format(getString(R.string.ime_connecting), address));
 		}
@@ -164,6 +172,10 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver connectReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			String sid = intent.getStringExtra(BluezService.SESSION_ID);
+			if (sid == null || !sid.equals(SESSION_ID))
+				return;
+
 			if (D) Log.d(LOG_NAME, "Connect received");
 			Toast.makeText(context, String.format(context.getString(R.string.connected_to_device_message), intent.getStringExtra(BluezService.EVENT_CONNECTED_ADDRESS)), Toast.LENGTH_SHORT).show();
 			m_connected = true;
@@ -174,6 +186,10 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver disconnectReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			String sid = intent.getStringExtra(BluezService.SESSION_ID);
+			if (sid == null || !sid.equals(SESSION_ID))
+				return;
+
 			if (D) Log.d(LOG_NAME, "Disconnect received");
 			Toast.makeText(context, String.format(context.getString(R.string.disconnected_from_device_message), intent.getStringExtra(BluezService.EVENT_DISCONNECTED_ADDRESS)), Toast.LENGTH_SHORT).show();
 			m_connected = false;
@@ -184,6 +200,10 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver errorReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			String sid = intent.getStringExtra(BluezService.SESSION_ID);
+			if (sid == null || !sid.equals(SESSION_ID))
+				return;
+
 			if (D) Log.d(LOG_NAME, "Error received");
 			Toast.makeText(context, String.format(context.getString(R.string.error_message_generic), intent.getStringExtra(BluezService.EVENT_ERROR_SHORT)), Toast.LENGTH_SHORT).show();
 			setNotificationText(String.format(getString(R.string.ime_error), intent.getStringExtra(BluezService.EVENT_ERROR_SHORT)));
@@ -206,6 +226,10 @@ public class BluezIME extends InputMethodService {
 	private BroadcastReceiver activityHandler = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			String sid = intent.getStringExtra(BluezService.SESSION_ID);
+			if (sid == null || !sid.equals(SESSION_ID))
+				return;
+
 			if (D) Log.d(LOG_NAME, "Update event received");
 			
 			try {
