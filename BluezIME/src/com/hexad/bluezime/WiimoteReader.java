@@ -154,6 +154,11 @@ public class WiimoteReader extends HIDReaderBase {
 		0x00, 0x00, (byte)0xA4, 0x20, 0x01, 0x01
 	};
 
+	//The ID for a Wii Classic Controller (not documented, but reported)
+	private static final byte[] CLASSIC_DEVICE_ID_ALT = new byte[] {
+		0x01, 0x00, (byte)0xA4, 0x20, 0x01, 0x01
+	};
+
 	//The ID for a Wii Nunchuck Controller
 	private static final byte[] NUNCHUCK_DEVICE_ID = new byte[] {
 		0x00, 0x00, (byte)0xA4, 0x20, 0x00, 0x00
@@ -399,11 +404,15 @@ public class WiimoteReader extends HIDReaderBase {
 			for(int i = 0; i < size; i++)
 				classic &= data[i] == CLASSIC_DEVICE_ID[i];
 
+			boolean classic_alt = true;
+			for(int i = 0; i < size; i++)
+				classic_alt &= data[i] == CLASSIC_DEVICE_ID_ALT[i];
+
 			boolean nunchuck = true;
 			for(int i = 0; i < size; i++)
 				nunchuck &= data[i] == NUNCHUCK_DEVICE_ID[i];
 
-			if (classic) {
+			if (classic || classic_alt) {
 				if (D) Log.d(DRIVER_NAME, "Wii Classic Controller Extension connected");
 				
 				//Clear any previous states
@@ -416,9 +425,7 @@ public class WiimoteReader extends HIDReaderBase {
 				
 				m_isClassicConnected = true;
 				updateReportMode();
-			}
-			
-			if (nunchuck) {
+			} else if (nunchuck) {
 				if (D) Log.d(DRIVER_NAME, "Wii Nunchuck Controller Extension connected");
 				
 				//Clear any previous states
@@ -435,6 +442,8 @@ public class WiimoteReader extends HIDReaderBase {
 
 				m_isNunchuckConnected = true;
 				updateReportMode();
+			} else {
+				Log.d(DRIVER_NAME, "Unknown extension device id: " + getHexString(data, 0, size));
 			}
 		}
 	}
@@ -689,7 +698,10 @@ public class WiimoteReader extends HIDReaderBase {
 		}				
 	}
 	
-	private void handleCoreButtons(byte a, byte b) {
+	private void handleCoreButtons(int a, int b) {
+		a = a & 0xff;
+		b = b & 0xff;
+		
 		handleDigitalButtons((a << 8) | b, m_coreButtons, CORE_KEYS);
 	}
 
@@ -713,9 +725,11 @@ public class WiimoteReader extends HIDReaderBase {
 
 		if (m_isClassicConnected) {
 
-			if (D3) Log.d(DRIVER_NAME, "Got Classic data: " + getHexString(data, offset, 6));
+			if (D3) Log.d(DRIVER_NAME, "Got Classic data: " + getHexString(data, offset, offset + 6));
 			
-			handleDigitalButtons((data[offset + 4] << 8) | data[offset + 5], m_classicButtons, CLASSIC_KEYS);
+			int byteA = data[offset + 4] & 0xff;
+			int byteB = data[offset + 5] & 0xff;
+			handleDigitalButtons((byteA << 8) | byteB, m_classicButtons, CLASSIC_KEYS);
 			
 			m_tmpAnalogValues[0] = data[offset] & 0x3f; //Left X
 			m_tmpAnalogValues[1] = data[offset + 1] & 0x3f; //Left Y
