@@ -27,8 +27,8 @@ public class DataDumpReader extends RfcommReader {
 	public static final String DRIVER_NAME = "dump";
 	public static final String DISPLAY_NAME = "Data Dump Reader";
 	
-	public DataDumpReader(String address, String sessionId, Context context) throws Exception {
-		super(address, sessionId, context);
+	public DataDumpReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		super(address, sessionId, context, startnotification);
 	}
 
 	@Override

@@ -30,8 +30,8 @@ public class PhonejoyReader extends BGP100Reader {
 	public static final String DRIVER_NAME = "phonejoy";
 	public static final String DISPLAY_NAME = "Phonejoy";
 	
-	public PhonejoyReader(String address, String sessionId, Context context) throws Exception {
-		super(address, sessionId, context);
+	public PhonejoyReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		super(address, sessionId, context, startnotification);
 		
 		//R
 		_lookup.put(0xb24e, new KeyEvent(KeyEvent.ACTION_DOWN, KEYCODE_BUTTON_R2));

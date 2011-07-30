@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.hexad.bluezime"
-      android:versionCode="9" android:versionName="1.8">
+      android:versionCode="10" android:versionName="1.9">
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
 
    	<service android:name="BluezService" android:exported="true" android:enabled="true" >
-   		<intent-filter>
-   			<action android:name="com.hexad.bluezime.getstate" />
-   		</intent-filter>
    		<intent-filter>
    			<action android:name="com.hexad.bluezime.disconnect" />
    		</intent-filter>
    		<intent-filter>
    			<action android:name="com.hexad.bluezime.connect" />
    		</intent-filter>
+   		<intent-filter>
+   			<action android:name="com.hexad.bluezime.featurechange" />
+   		</intent-filter>
+   		<intent-filter>
+   			<action android:name="com.hexad.bluezime.getconfig" />
+   		</intent-filter>
    	</service>
+   	
+   	<service android:name="BluezForegroundService" android:exported="false" android:enabled="true" />
 
     <service android:name="BluezIME"
         android:label="Bluez IME"

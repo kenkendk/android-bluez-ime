@@ -104,8 +104,8 @@ public class iControlPadReader extends RfcommReader {
 	//The state of buttons, 1 = pressed, 0 = unpressed
 	private int[] m_buttons = new int[16];
 	
-	public iControlPadReader(String address, String sessionId, Context context) throws Exception {
-		super(address, sessionId, context);
+	public iControlPadReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		super(address, sessionId, context, startnotification);
 	}
 
 	@Override

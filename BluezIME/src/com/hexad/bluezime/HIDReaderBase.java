@@ -39,8 +39,8 @@ public abstract class HIDReaderBase extends RfcommReader {
 	//A list of buffers, used to send HID reports
 	protected Hashtable<Integer, byte[]> m_readBuffers;
 	
-	public HIDReaderBase(String address, String sessionId, Context context) throws Exception {
-		super(address, sessionId, context, false);
+	public HIDReaderBase(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		super(address, sessionId, context, false, startnotification);
 		
 		m_readBuffers = new Hashtable<Integer, byte[]>();
 	}

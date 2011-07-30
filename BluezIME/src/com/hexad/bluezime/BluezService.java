@@ -17,7 +17,6 @@
 */
 package com.hexad.bluezime;
 
-import java.util.Dictionary;
 import java.util.Hashtable;
 
 import android.app.IntentService;
@@ -80,6 +79,8 @@ public class BluezService extends IntentService {
 	public static final String REQUEST_CONNECT = "com.hexad.bluezime.connect";
 	public static final String REQUEST_CONNECT_ADDRESS = "address";
 	public static final String REQUEST_CONNECT_DRIVER = "driver";
+	public static final String REQUEST_CONNECT_USE_UI = "use-ui-setup";
+	public static final String REQUEST_CONNECT_CREATE_NOTIFICATION = "registernotification";
 		
 	public static final String REQUEST_DISCONNECT = "com.hexad.bluezime.disconnect";
 	
@@ -110,7 +111,7 @@ public class BluezService extends IntentService {
 	
 	//private static BluezDriverInterface m_reader = null;
 	private static Hashtable<String, BluezDriverInterface> m_readers = new Hashtable<String, BluezDriverInterface>();
-	
+
 	public BluezService() {
 		super(LOG_NAME);
 	}
@@ -147,16 +148,30 @@ public class BluezService extends IntentService {
 		}
 
 		if (intent.getAction().equals(REQUEST_CONNECT)) {
-			
-			String address = null;
-			String driver = null;
+            String address = null;
+            String driver = null;
 			
 			if (intent.hasExtra(REQUEST_CONNECT_ADDRESS))
 				address = intent.getStringExtra(REQUEST_CONNECT_ADDRESS);
 			if (intent.hasExtra(REQUEST_CONNECT_DRIVER))
 				driver = intent.getStringExtra(REQUEST_CONNECT_DRIVER);
 			
-			connectToDevice(address, driver, sessionId);
+			if (address == null || driver == null) {
+				boolean use_ui = intent.getBooleanExtra(REQUEST_CONNECT_USE_UI, false);
+				Preferences p = new Preferences(this);
+
+				if (address == null)
+					address = p.getSelectedDeviceAddress();
+				if (driver == null)
+					driver = p.getSelectedDriverName();
+	            
+	            if (!use_ui) {
+	            	Log.w(LOG_NAME, "No driver/address set for connect request, please update your application. If this is intentional, please set the option " + REQUEST_CONNECT_USE_UI + " to true");
+	            }
+			}
+			
+			boolean startnotification = intent.getBooleanExtra(REQUEST_CONNECT_CREATE_NOTIFICATION, true);
+			connectToDevice(address, driver, sessionId, startnotification);
 		} else if (intent.getAction().equals(REQUEST_DISCONNECT)) {
 			disconnectFromDevice(sessionId);
 		} else if (intent.getAction().equals(REQUEST_FEATURECHANGE)) {
@@ -247,14 +262,13 @@ public class BluezService extends IntentService {
 		finally
 		{
 			synchronized (m_readers) {
-				if (m_readers.containsKey(sessionId))
+				if (sessionId != null && m_readers.containsKey(sessionId))
 					m_readers.remove(sessionId);
 			}
 		}
 	}
 	
-	private synchronized void connectToDevice(String address, String driver, String sessionId) {
-
+	private synchronized void connectToDevice(String address, String driver, String sessionId, boolean startnotification) {
 		try {
 			if (address == null || address.trim().length() == 0)
 				throw new Exception("Invalid call, no address specified");
@@ -272,7 +286,7 @@ public class BluezService extends IntentService {
 			BluezDriverInterface reader = null;
 			
 			synchronized (m_readers) {
-				if (m_readers.containsKey(sessionId))
+				if (sessionId != null && m_readers.containsKey(sessionId))
 					reader = m_readers.get(sessionId);
 			
 				if (reader != null)
@@ -290,23 +304,23 @@ public class BluezService extends IntentService {
 				sendBroadcast(connectingBroadcast);
 	
 				if (driver.toLowerCase().equals(ZeemoteReader.DRIVER_NAME.toLowerCase()))
-					reader = new ZeemoteReader(address, sessionId, getApplicationContext());
+					reader = new ZeemoteReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(BGP100Reader.DRIVER_NAME.toLowerCase()))
-					reader = new BGP100Reader(address, sessionId, getApplicationContext());
+					reader = new BGP100Reader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(PhonejoyReader.DRIVER_NAME.toLowerCase()))
-					reader = new PhonejoyReader(address, sessionId, getApplicationContext());
+					reader = new PhonejoyReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(DataDumpReader.DRIVER_NAME.toLowerCase()))
-					reader = new DataDumpReader(address, sessionId, getApplicationContext());
+					reader = new DataDumpReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(iControlPadReader.DRIVER_NAME.toLowerCase()))
-					reader = new iControlPadReader(address, sessionId, getApplicationContext());
+					reader = new iControlPadReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(WiimoteReader.DRIVER_NAME.toLowerCase()))
-					reader = new WiimoteReader(address, sessionId, getApplicationContext());
+					reader = new WiimoteReader(address, sessionId, getApplicationContext(), startnotification);
 				else
 					throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 				
 				m_readers.put(sessionId, reader);
 			}
-
+			
 			new Thread(reader).start();
 		} catch (Exception ex) {
 			notifyError(ex, sessionId);

@@ -44,8 +44,8 @@ public class BGP100Reader extends RfcommReader {
 	
 	protected HashMap<Integer, Boolean> _keyStates;
 	
-	public BGP100Reader(String address, String sessionId, Context context) throws Exception {
-		super(address, sessionId, context);
+	public BGP100Reader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		super(address, sessionId, context, startnotification);
 		
 		//TODO: It is possible to map all buttons by looking at
 		// the least significant 4 bits, and then use a 

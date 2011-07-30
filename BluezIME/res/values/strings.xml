@@ -13,6 +13,8 @@
 <string name="bluetooth_disable_question">This will turn off Bluetooth,\neven if any devices are connected.\n\nDo you really want to disconnect?</string>
 <string name="bluetooth_disable_dialog_title">Turn off Bluetooth</string>
 
+<string name="notification_text">Active</string>
+
 <string name="yes">Yes</string>
 <string name="no">No</string>
 

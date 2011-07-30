@@ -18,6 +18,7 @@
 package com.hexad.bluezime;
 
 import java.io.InputStream;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -38,6 +39,7 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	protected String m_address = null;
 	protected String m_name = null;
 	protected String m_sessionId = null;
+	private Intent m_foregroundServiceIntent = null;
 
 	protected Intent errorBroadcast = new Intent(BluezService.EVENT_ERROR);
 	protected Intent connectedBroadcast = new Intent(BluezService.EVENT_CONNECTED);
@@ -51,13 +53,18 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	//private static final UUID HID_UUID = UUID.fromString("00001124-0000-1000-8000-00805f9b34fb");
 	//private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 	
-	public RfcommReader(String address, String sessionId, Context context) throws Exception {
-		this(address, sessionId, context, true);
+	public RfcommReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
+		this(address, sessionId, context, true, startnotification);
 	}
 
-	protected RfcommReader(String address, String sessionId, Context context, boolean connect) throws Exception {
+	protected RfcommReader(String address, String sessionId, Context context, boolean connect, boolean startnotification) throws Exception {
 		try
-		{
+		{	
+			if (startnotification) {
+				m_foregroundServiceIntent = new Intent(context, BluezForegroundService.class);
+	        	context.startService(m_foregroundServiceIntent);
+			}
+			
 			m_context = context;
 			m_address = address;
 			m_sessionId = sessionId;
@@ -186,6 +193,11 @@ public abstract class RfcommReader implements BluezDriverInterface {
 		m_isRunning = false;
 		m_socket = null;
 		m_input = null;
+		
+		if (m_foregroundServiceIntent != null && m_context != null) {
+			m_foregroundServiceIntent = null;
+			m_context.stopService(m_foregroundServiceIntent);
+		}
 	}
 	
 	@Override

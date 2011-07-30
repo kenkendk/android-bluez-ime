@@ -116,6 +116,7 @@ public class BluezIME extends InputMethodService {
 		i.putExtra(BluezService.REQUEST_CONNECT_ADDRESS, address);
 		i.putExtra(BluezService.REQUEST_CONNECT_DRIVER, driver);
 		i.putExtra(BluezService.SESSION_ID, SESSION_ID);
+		i.putExtra(BluezService.REQUEST_CONNECT_CREATE_NOTIFICATION, false);
 		startService(i);
 	}
 	
