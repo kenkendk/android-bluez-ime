@@ -261,9 +261,9 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	public static String getHexString(byte[] buffer, int offset, int count) {
         StringBuilder buf = new StringBuilder();
         for (int i = offset; i < count; i++) {
-            if (buffer[i] < 0x10) 
+            if ((buffer[i] & 0xff) < 0x10) 
                 buf.append("0");
-            buf.append(Integer.toHexString(buffer[i])).append(" ");
+            buf.append(Integer.toHexString((buffer[i] & 0xff))).append(" ");
         }
         
         return buf.toString();
