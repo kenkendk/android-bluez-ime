@@ -49,6 +49,7 @@ public class BluezService extends IntentService {
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
 	
 	public static final String SESSION_ID = "com.hexad.bluezime.sessionid";
+	public static final String DEFAULT_SESSION_NAME = "com.hexad.bluezime.default_session";
 	
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
 	public static final String EVENT_KEYPRESS_KEY = "key";
@@ -137,7 +138,7 @@ public class BluezService extends IntentService {
 		if (intent == null || intent.getAction() == null)
 			return;
 		
-		String sessionId = null;
+		String sessionId = DEFAULT_SESSION_NAME;
 		if (intent.hasExtra(SESSION_ID))
 			sessionId = intent.getStringExtra(SESSION_ID);
 		

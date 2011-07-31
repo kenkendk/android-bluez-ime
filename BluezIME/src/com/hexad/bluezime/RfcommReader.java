@@ -195,8 +195,8 @@ public abstract class RfcommReader implements BluezDriverInterface {
 		m_input = null;
 		
 		if (m_foregroundServiceIntent != null && m_context != null) {
-			m_foregroundServiceIntent = null;
 			m_context.stopService(m_foregroundServiceIntent);
+			m_foregroundServiceIntent = null;
 		}
 	}
 	
