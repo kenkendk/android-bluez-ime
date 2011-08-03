@@ -9,8 +9,11 @@ import android.os.IBinder;
 
 public class BluezForegroundService extends Service {
 
-	private static final int NOTIFICATION_ID = 10;
-	private NotificationManager notificationManager;
+	static final String ACTION_START = "com.hexad.bluezime.START_FG_SERVICE";
+	static final String ACTION_STOP = "com.hexad.bluezime.STOP_FG_SERVICE";
+	private static final int NOTIFICATION_ID = 10; 
+	private NotificationManager m_notificationManager;
+	private int m_connectionCount = 0;
 	
 	@Override
 	public void onCreate() {
@@ -19,9 +22,21 @@ public class BluezForegroundService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (notificationManager != null) return START_NOT_STICKY;
-		
-		notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+		if (ACTION_START.equals(intent.getAction())) {
+    		if (m_connectionCount == 0)
+    			showNotification();
+    		m_connectionCount++;
+			return START_STICKY;
+		} else if (ACTION_STOP.equals(intent.getAction())) {
+			m_connectionCount--;
+			if (m_connectionCount <= 0)
+				stopSelf();
+		}
+    	return START_NOT_STICKY;
+	}
+	
+	private void showNotification() {
+		m_notificationManager = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 		PendingIntent settingsIntent = PendingIntent.getActivity(this, 0, new Intent(this, BluezIMESettings.class), 0);
 
 		Notification notification = new Notification(R.drawable.icon, null, System.currentTimeMillis());
@@ -29,14 +44,13 @@ public class BluezForegroundService extends Service {
 		notification.flags |= Notification.FLAG_ONGOING_EVENT;
 		notification.flags |= Notification.FLAG_NO_CLEAR;
 
-		notificationManager.notify(NOTIFICATION_ID, notification);
+		m_notificationManager.notify(NOTIFICATION_ID, notification);
 		startForeground(NOTIFICATION_ID, notification);
-		return START_STICKY;
 	}
 
 	@Override
 	public void onDestroy() {
-		notificationManager.cancel(NOTIFICATION_ID);
+		m_notificationManager.cancel(NOTIFICATION_ID);
 		super.onDestroy();
 	}
 

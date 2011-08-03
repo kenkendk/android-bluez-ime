@@ -62,6 +62,7 @@ public abstract class RfcommReader implements BluezDriverInterface {
 		{	
 			if (startnotification) {
 				m_foregroundServiceIntent = new Intent(context, BluezForegroundService.class);
+				m_foregroundServiceIntent.setAction(BluezForegroundService.ACTION_START);
 	        	context.startService(m_foregroundServiceIntent);
 			}
 			
@@ -195,7 +196,8 @@ public abstract class RfcommReader implements BluezDriverInterface {
 		m_input = null;
 		
 		if (m_foregroundServiceIntent != null && m_context != null) {
-			m_context.stopService(m_foregroundServiceIntent);
+			m_foregroundServiceIntent.setAction(BluezForegroundService.ACTION_STOP);
+			m_context.startService(m_foregroundServiceIntent);
 			m_foregroundServiceIntent = null;
 		}
 	}
