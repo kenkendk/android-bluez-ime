@@ -149,6 +149,9 @@ public class WiimoteReader extends HIDReaderBase {
 		KeyEvent.KEYCODE_S, 		//Nunchuck, Thumbstick down
 	};
 
+	//TODO: Figure out if it is a parsing bug that makes the first byte differ
+	// for the extension ID or it is safe to ignore the first byte?
+	
 	//The ID for a Wii Classic Controller
 	private static final byte[] CLASSIC_DEVICE_ID = new byte[] {
 		0x00, 0x00, (byte)0xA4, 0x20, 0x01, 0x01
@@ -162,6 +165,11 @@ public class WiimoteReader extends HIDReaderBase {
 	//The ID for a Wii Nunchuck Controller
 	private static final byte[] NUNCHUCK_DEVICE_ID = new byte[] {
 		0x00, 0x00, (byte)0xA4, 0x20, 0x00, 0x00
+	};
+
+	//The ID for a Wii Nunchuck Controller (not documented, but reported)
+	private static final byte[] NUNCHUCK_DEVICE_ID_ALT = new byte[] {
+		(byte)0xFF, 0x00, (byte)0xA4, 0x20, 0x00, 0x00
 	};
 
 	//Enumeration for states required for extension initialization
@@ -412,6 +420,10 @@ public class WiimoteReader extends HIDReaderBase {
 			for(int i = 0; i < size; i++)
 				nunchuck &= data[i] == NUNCHUCK_DEVICE_ID[i];
 
+			boolean nunchuck_alt = true;
+			for(int i = 0; i < size; i++)
+				nunchuck_alt &= data[i] == NUNCHUCK_DEVICE_ID_ALT[i];
+			
 			if (classic || classic_alt) {
 				if (D) Log.d(DRIVER_NAME, "Wii Classic Controller Extension connected");
 				
@@ -425,7 +437,7 @@ public class WiimoteReader extends HIDReaderBase {
 				
 				m_isClassicConnected = true;
 				updateReportMode();
-			} else if (nunchuck) {
+			} else if (nunchuck | nunchuck_alt) {
 				if (D) Log.d(DRIVER_NAME, "Wii Nunchuck Controller Extension connected");
 				
 				//Clear any previous states
