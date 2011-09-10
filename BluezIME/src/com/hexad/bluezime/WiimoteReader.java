@@ -144,9 +144,9 @@ public class WiimoteReader extends HIDReaderBase {
 	//Emulated keypress values for nunchuck thumbsticks
 	private static final int[] NUNCHUCK_ANALOG_KEYS = new int[] {	
 		KeyEvent.KEYCODE_D, 		//Nunchuck, Thumbstick right
-		KeyEvent.KEYCODE_Q, 		//Nunchuck, Thumbstick lef
-		KeyEvent.KEYCODE_W, 		//Nunchuck, Thumbstick up
+		KeyEvent.KEYCODE_Q, 		//Nunchuck, Thumbstick left
 		KeyEvent.KEYCODE_S, 		//Nunchuck, Thumbstick down
+		KeyEvent.KEYCODE_W, 		//Nunchuck, Thumbstick up
 	};
 
 	//TODO: Figure out if it is a parsing bug that makes the first byte differ
@@ -777,6 +777,7 @@ public class WiimoteReader extends HIDReaderBase {
 					+ m_tmpAnalogValues[4] + ", "
 					+ m_tmpAnalogValues[5] + ", ");
 			
+			//TODO: Do we need to invert the y-axis here? (most likely)
 			handleAnalogValues(m_tmpAnalogValues, m_classicAnalogValues, m_classicEmulatedButtons, CLASSIC_ANALOG_KEYS, 0, false);
 		
 		} else if (m_isNunchuckConnected) {
@@ -826,6 +827,9 @@ public class WiimoteReader extends HIDReaderBase {
 			//We scale the values so they are all in the -127/+127 range
 			m_tmpAnalogValues[0] = (int)((m_tmpAnalogValues[0] - 0x78) * 1.27);
 			m_tmpAnalogValues[1] = (int)((m_tmpAnalogValues[1] - 0x81) * 1.3);
+			
+			//Bugfix, invert the Y-axis values:
+			m_tmpAnalogValues[1] *= -1;
 			
 			handleAnalogValues(m_tmpAnalogValues, m_nunchuckAnalogValues, m_nunchuckEmulatedButtons, NUNCHUCK_ANALOG_KEYS, 0, false);
 		}
