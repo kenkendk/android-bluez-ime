@@ -27,7 +27,7 @@ import android.util.Log;
 
 public abstract class HIDReaderBase extends RfcommReader {
 
-	private static final boolean D = true;
+	private static final boolean D = false;
 	private static final String LOG_NAME = "HID Reader - ";
 	
 	private static final int HIDP_CONTROL_CHANNEL = 0x11; 
