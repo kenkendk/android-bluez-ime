@@ -137,21 +137,8 @@ public class BGP100Reader extends RfcommReader {
 					if (remaining < 3)
 						return remaining;
 					
-					int axis = (data[offset + 1] & 0xff) - 0x11;
-					if (axis >= 0 && axis < 4) {
-						int axis_value = data[offset + 2] & 0xff;
-						int normalized = Math.max(-127, Math.min(127, (axis_value - 127)));
-						
-						if (D) Log.d(getDriverName(), "Axis " + axis + " changed to " + normalized + " (" + axis_value + ")");
-						
-						directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_DIRECTION, axis);
-						directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_VALUE, normalized);
-						m_context.sendBroadcast(directionBroadcast);
-						
-					} else {
-						if (D) Log.w(getDriverName(), "Unexpected axis: " + axis + ", raw value: " + data[offset + 1]);
-					}
-					
+					handleAnalogValue(data[offset + 1], data[offset + 2]);
+										
 					offset += 3;
 					remaining -= 3;
 					
@@ -206,6 +193,9 @@ public class BGP100Reader extends RfcommReader {
 		if (D2 && remaining > 0) Log.i(getDriverName(), "Reports remaining: " + remaining);
 		
 		return remaining;
+	}
+
+	protected void handleAnalogValue(int axis, int value) {		
 	}
 
 	@Override

@@ -19,16 +19,34 @@
 package com.hexad.bluezime;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.KeyEvent;
 
 public class PhonejoyReader extends BGP100Reader {
 
+	private static final boolean D = false;
+	
 	public static final int KEYCODE_BUTTON_L2 = 0x68;
 	public static final int KEYCODE_BUTTON_R2 = 0x69;
 	public static final int KEYCODE_BUTTON_SELECT = 0x6d; 
 
 	public static final String DRIVER_NAME = "phonejoy";
 	public static final String DISPLAY_NAME = "Phonejoy";
+	
+	private static final int ANALOG_THRESHOLD = 127 / 2;
+	
+	private static final int[] ANALOG_KEYS = new int[] {
+		KeyEvent.KEYCODE_T,
+		KeyEvent.KEYCODE_G,
+		KeyEvent.KEYCODE_F,
+		KeyEvent.KEYCODE_H,
+		KeyEvent.KEYCODE_I,
+		KeyEvent.KEYCODE_K,
+		KeyEvent.KEYCODE_J,
+		KeyEvent.KEYCODE_L
+	};
+	
+	private boolean[] mAnalogKeyStates = new boolean[ANALOG_KEYS.length];
 	
 	public PhonejoyReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
 		super(address, sessionId, context, startnotification);
@@ -82,6 +100,50 @@ public class PhonejoyReader extends BGP100Reader {
 	@Override
 	public String getDriverName() {
 		return DRIVER_NAME;
+	}
+
+	@Override
+	protected void handleAnalogValue(int axis, int value) {
+		
+		axis = (axis & 0xff) - 0x11;
+		if (axis >= 0 && axis < 4) {
+			int axis_value = value & 0xff;
+			int normalized = Math.max(-127, Math.min(127, (axis_value - 127)));
+			
+			if (D) Log.d(getDriverName(), "Axis " + axis + " changed to " + normalized + " (" + axis_value + ")");
+			
+			directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_DIRECTION, axis);
+			directionBroadcast.putExtra(BluezService.EVENT_DIRECTIONALCHANGE_VALUE, normalized);
+			m_context.sendBroadcast(directionBroadcast);
+			
+			boolean pressedUp = normalized < -ANALOG_THRESHOLD;
+			boolean pressedDown = normalized > ANALOG_THRESHOLD;
+			
+			if (pressedUp != mAnalogKeyStates[(axis * 2)]) {
+				mAnalogKeyStates[(axis * 2)] = pressedUp;
+
+				if (D) Log.w(getDriverName(), "Sending button event, button: " + ANALOG_KEYS[(axis * 2)] + ", direction: " + (pressedUp ? "DOWN" : "UP"));				
+				
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, pressedUp ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, ANALOG_KEYS[(axis * 2)]);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
+				m_context.sendBroadcast(keypressBroadcast);
+			}
+			
+			if (pressedDown != mAnalogKeyStates[(axis * 2) + 1]) {
+				mAnalogKeyStates[(axis * 2) + 1] = pressedDown;
+
+				if (D) Log.w(getDriverName(), "Sending button event, button: " + ANALOG_KEYS[(axis * 2) + 1] + ", direction: " + (pressedDown ? "DOWN" : "UP"));				
+
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, pressedDown ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, ANALOG_KEYS[(axis * 2) + 1]);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
+				m_context.sendBroadcast(keypressBroadcast);
+			}
+			
+		} else {
+			if (D) Log.w(getDriverName(), "Unexpected axis: " + axis + ", raw value: " + axis);
+		}
 	}
 
 	public static int[] getButtonCodes() {
