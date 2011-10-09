@@ -26,6 +26,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -159,29 +160,10 @@ public class BluezIMESettings extends PreferenceActivity {
         			
         			if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
         				m_bluetoothActivity.setChecked(true);
-        				AlertDialog.Builder dlg = new AlertDialog.Builder(BluezIMESettings.this);
-        				dlg.setCancelable(true);
-        				dlg.setMessage(R.string.bluetooth_disable_question);
-        				dlg.setTitle(R.string.bluetooth_disable_dialog_title);
-        				
-        				dlg.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								BluetoothAdapter.getDefaultAdapter().disable();
-							}}
-        				);
-        				
-        				dlg.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-							}}
-        				);
-        				
-        				dlg.show();
-        				
+        				ImprovedBluetoothDevice.DeactivateBluetooth(BluezIMESettings.this);
         			} else {
 	        			m_bluetoothActivity.setChecked(false);
-	        			startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+	        			ImprovedBluetoothDevice.ActivateBluetooth(BluezIMESettings.this);
         			}
         			return false;
         		}

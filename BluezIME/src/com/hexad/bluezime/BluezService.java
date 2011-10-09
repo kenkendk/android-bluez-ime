@@ -34,7 +34,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DRIVER_NAME, 
 		PhonejoyReader.DRIVER_NAME,
 		iControlPadReader.DRIVER_NAME,
-		WiimoteReader.DRIVER_NAME,
+		//WiimoteReader.DRIVER_NAME,
 		DataDumpReader.DRIVER_NAME
 	};
 	
@@ -43,7 +43,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DISPLAY_NAME, 
 		PhonejoyReader.DISPLAY_NAME,
 		iControlPadReader.DISPLAY_NAME,
-		WiimoteReader.DISPLAY_NAME,
+		//WiimoteReader.DISPLAY_NAME,
 		DataDumpReader.DISPLAY_NAME
 	};
 	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];

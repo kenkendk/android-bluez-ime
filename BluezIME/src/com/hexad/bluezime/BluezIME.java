@@ -20,6 +20,7 @@ package com.hexad.bluezime;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -111,6 +112,14 @@ public class BluezIME extends InputMethodService {
     	String address = m_prefs.getSelectedDeviceAddress();
     	String driver = m_prefs.getSelectedDriverName();
 
+    	try {
+    		if (!BluetoothAdapter.getDefaultAdapter().isEnabled())
+    			ImprovedBluetoothDevice.ActivateBluetooth(this);
+    	} catch (Exception ex) {
+    		Log.e(LOG_NAME, "Failed to activate bluetooth: " + ex.getMessage());
+    	}
+    	
+    	
 		Intent i = new Intent(this, BluezService.class);
 		i.setAction(BluezService.REQUEST_CONNECT);
 		i.putExtra(BluezService.REQUEST_CONNECT_ADDRESS, address);

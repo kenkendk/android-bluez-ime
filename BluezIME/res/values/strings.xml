@@ -12,6 +12,8 @@
 <string name="bluetooth_unsupported">Bluetooth is not supported on this device</string>
 <string name="bluetooth_disable_question">This will turn off Bluetooth,\neven if any devices are connected.\n\nDo you really want to disconnect?</string>
 <string name="bluetooth_disable_dialog_title">Turn off Bluetooth</string>
+<string name="bluetooth_enable_question">Do you wish to turn on Bluetooth?</string>
+<string name="bluetooth_enable_dialog_title">Turn on Bluetooth</string>
 
 <string name="notification_text">Active</string>
 

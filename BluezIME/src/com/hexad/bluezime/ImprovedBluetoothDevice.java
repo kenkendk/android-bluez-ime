@@ -23,9 +23,15 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.UUID;
 
+import android.app.AlertDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Parcel;
 import android.os.ParcelUuid;
 
@@ -54,6 +60,57 @@ public class ImprovedBluetoothDevice {
 		} catch (Exception ex) {
 			return null;
 		}
+	}
+	
+	public static void ActivateBluetooth(Context c) {
+		try {
+			//Play nice and use the system dialog for this
+			c.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
+		} catch (ActivityNotFoundException ax) {
+			
+			//If it fails, do this directly
+			AlertDialog.Builder dlg = new AlertDialog.Builder(c);
+			dlg.setCancelable(true);
+			dlg.setMessage(R.string.bluetooth_enable_question);
+			dlg.setTitle(R.string.bluetooth_enable_dialog_title);
+			
+			dlg.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					BluetoothAdapter.getDefaultAdapter().enable();
+				}}
+			);
+			
+			dlg.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+				}}
+			);
+			
+			dlg.show();
+		}
+	}
+	
+	public static void DeactivateBluetooth(Context c) {
+		AlertDialog.Builder dlg = new AlertDialog.Builder(c);
+		dlg.setCancelable(true);
+		dlg.setMessage(R.string.bluetooth_disable_question);
+		dlg.setTitle(R.string.bluetooth_disable_dialog_title);
+		
+		dlg.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				BluetoothAdapter.getDefaultAdapter().disable();
+			}}
+		);
+		
+		dlg.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}}
+		);
+		
+		dlg.show();
 	}
 	
 	private static final int TYPE_RFCOMM = 1;
