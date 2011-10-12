@@ -34,6 +34,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.ParcelUuid;
+import android.util.AndroidRuntimeException;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 
 //Class that mimics a regular android.bluetooth.BluetoothDevice,
 // but exposes some of the internal methods as regular methods
@@ -62,33 +66,54 @@ public class ImprovedBluetoothDevice {
 		}
 	}
 	
-	public static void ActivateBluetooth(Context c) {
+	public static void ActivateBluetooth(Context c, View v) {
 		try {
 			//Play nice and use the system dialog for this
 			c.startActivity(new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE));
 		} catch (ActivityNotFoundException ax) {
-			
-			//If it fails, do this directly
-			AlertDialog.Builder dlg = new AlertDialog.Builder(c);
-			dlg.setCancelable(true);
-			dlg.setMessage(R.string.bluetooth_enable_question);
-			dlg.setTitle(R.string.bluetooth_enable_dialog_title);
-			
-			dlg.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-					BluetoothAdapter.getDefaultAdapter().enable();
-				}}
-			);
-			
-			dlg.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-				@Override
-				public void onClick(DialogInterface dialog, int which) {
-				}}
-			);
-			
+			ManualAskBluetoothActivate(c, v);
+		} catch (AndroidRuntimeException ax) {
+			ManualAskBluetoothActivate(c, v);
+		}
+	}
+	
+	private static void ManualAskBluetoothActivate(Context c, View v) {
+		//If it fails, do this directly
+		AlertDialog.Builder builder = new AlertDialog.Builder(c);
+        
+        builder.setCancelable(true);
+		builder.setMessage(R.string.bluetooth_enable_question);
+		builder.setTitle(R.string.bluetooth_enable_dialog_title);
+		
+		builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				BluetoothAdapter.getDefaultAdapter().enable();
+			}}
+		);
+		
+		builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+			}}
+		);
+
+		//If we are running in the IME, we need to do something special
+		if (v != null) {
+			AlertDialog dlg = builder.create();
+	
+			Window window = dlg.getWindow(); 
+	        WindowManager.LayoutParams lp = window.getAttributes();
+	        lp.token = v.getWindowToken();
+	        lp.type = WindowManager.LayoutParams.TYPE_APPLICATION_ATTACHED_DIALOG;
+	        window.setAttributes(lp);
+	        window.addFlags(WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM);
+	
 			dlg.show();
 		}
+		else 
+			builder.show();
+
 	}
 	
 	public static void DeactivateBluetooth(Context c) {

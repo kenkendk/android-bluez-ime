@@ -38,6 +38,7 @@ public class Preferences {
 	private static final String PREF_KEY_MAPPING = "key mapping";
 	private static final String PREF_KEY_MAPPING_PROFILE = "key mapping profile";
 	private static final String PREF_PROFILE_NAME = "profile name";
+	private static final String PREF_MANAGE_BLUETOOTH = "manage bluetooth";
 	
 	private SharedPreferences m_prefs;
 	private Context m_context;
@@ -182,5 +183,16 @@ public class Preferences {
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
+
+	public boolean getManageBluetooth() {
+		return m_prefs.getBoolean(PREF_MANAGE_BLUETOOTH, true);
+	}
 	
+	public void setManageBluetooth(boolean value) {
+		Editor e = m_prefs.edit();
+		e.putBoolean(PREF_MANAGE_BLUETOOTH, value);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+
 }

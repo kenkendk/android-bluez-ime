@@ -16,6 +16,8 @@
 <string name="bluetooth_enable_dialog_title">Turn on Bluetooth</string>
 
 <string name="notification_text">Active</string>
+<string name="enabling_bluetooth">Turning Bluetooth on...</string>
+<string name="disabling_bluetooth">Turning Bluetooth off...</string>
 
 <string name="yes">Yes</string>
 <string name="no">No</string>
@@ -46,6 +48,8 @@
 
 <string name="preferencelist_configure_keys_short">Configure key mapping</string>
 <string name="preferencelist_configure_keys_long">Optionally select what each button should do</string>
+<string name="preferencelist_autoenabledisable_short">Manage Bluetooth</string>
+<string name="preferencelist_autoenabledisable_long">Automatically enable and disable Bluetooth as required</string>
 
 <string name="preference_help_short">Help / Support / More</string>
 <string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>

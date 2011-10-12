@@ -67,6 +67,7 @@ public class BluezIME extends InputMethodService {
         registerReceiver(preferenceChangedHandler, new IntentFilter(Preferences.PREFERENCES_UPDATED));
         registerReceiver(activityHandler, new IntentFilter(BluezService.EVENT_KEYPRESS));
         registerReceiver(activityHandler, new IntentFilter(BluezService.EVENT_DIRECTIONALCHANGE));
+    	registerReceiver(bluetoothStateMonitor, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
 	}
 	
 	private void setNotificationText(CharSequence message) {
@@ -111,14 +112,28 @@ public class BluezIME extends InputMethodService {
     	if (D) Log.d(LOG_NAME, "Connecting");
     	String address = m_prefs.getSelectedDeviceAddress();
     	String driver = m_prefs.getSelectedDriverName();
-
-    	try {
-    		if (!BluetoothAdapter.getDefaultAdapter().isEnabled())
-    			ImprovedBluetoothDevice.ActivateBluetooth(this);
-    	} catch (Exception ex) {
-    		Log.e(LOG_NAME, "Failed to activate bluetooth: " + ex.getMessage());
-    	}
     	
+    	if (m_prefs.getManageBluetooth()) {
+	    	try {
+	    		if (!BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+	    	    	//Unfortunately this does not work because there is no view
+	    	    	// associated with this IME, and thus we cannot show popup dialogs
+	    			//ImprovedBluetoothDevice.ActivateBluetooth(this, m_inputView);
+	    			
+	    			//NOTE: This violates the guidelines that state that the user should 
+	    			// be asked explicitly before turning BT on 
+	    			BluetoothAdapter.getDefaultAdapter().enable();
+	
+	    			Toast.makeText(this, this.getString(R.string.enabling_bluetooth), Toast.LENGTH_SHORT).show();
+	    			setNotificationText(this.getString(R.string.enabling_bluetooth));
+	
+	    			//We will connect when BT is on
+	    			return;
+	    		}
+	    	} catch (Exception ex) {
+	    		Log.e(LOG_NAME, "Failed to activate bluetooth: " + ex.getMessage());
+	    	}
+    	}
     	
 		Intent i = new Intent(this, BluezService.class);
 		i.setAction(BluezService.REQUEST_CONNECT);
@@ -158,6 +173,7 @@ public class BluezIME extends InputMethodService {
         unregisterReceiver(errorReceiver);
         unregisterReceiver(preferenceChangedHandler);
         unregisterReceiver(activityHandler);
+        unregisterReceiver(bluetoothStateMonitor);
         
         connectReceiver = null;
         connectingReceiver = null;
@@ -165,6 +181,18 @@ public class BluezIME extends InputMethodService {
         activityHandler = null;
         errorReceiver = null;
         preferenceChangedHandler = null;
+        bluetoothStateMonitor = null;
+        
+        if (m_prefs.getManageBluetooth()) {
+	        try {
+	        	if (BluetoothAdapter.getDefaultAdapter().isEnabled()) {
+	        		Toast.makeText(this, this.getString(R.string.disabling_bluetooth), Toast.LENGTH_SHORT).show();
+	        		BluetoothAdapter.getDefaultAdapter().disable();
+	        	}
+	        } catch (Exception ex) {
+	        	Log.e(LOG_NAME, "Failed to turn BT off: " + ex.getMessage());
+	        }
+        }
 	}
 	
 	private BroadcastReceiver connectingReceiver =  new BroadcastReceiver() {
@@ -175,6 +203,7 @@ public class BluezIME extends InputMethodService {
 				return;
 			
 			String address = intent.getStringExtra(BluezService.EVENT_CONNECTING_ADDRESS);
+			Toast.makeText(BluezIME.this, String.format(getString(R.string.ime_connecting), address), Toast.LENGTH_SHORT).show();
 			setNotificationText(String.format(getString(R.string.ime_connecting), address));
 		}
 	};
@@ -269,7 +298,20 @@ public class BluezIME extends InputMethodService {
 				Log.e(LOG_NAME, "Failed to send key events: " + ex.toString());
 			}
 		}
-	};	
+	};
+	
+	private BroadcastReceiver bluetoothStateMonitor = new BroadcastReceiver() {
+		
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
+			if (state == BluetoothAdapter.STATE_ON) {
+				if (!m_connected)
+					connect();
+			}
+		}
+	};
+	
 
 	
 	//Deprecated, could be used to simulate hardware keypress

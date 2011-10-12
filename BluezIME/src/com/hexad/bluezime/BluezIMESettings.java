@@ -54,6 +54,7 @@ public class BluezIMESettings extends PreferenceActivity {
 	private Preference m_helpButton;
 	private Preference m_configureButton;
 	private ListPreference m_donateButton;
+	private CheckBoxPreference m_manageBluetooth;
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
@@ -75,11 +76,12 @@ public class BluezIMESettings extends PreferenceActivity {
         m_helpButton = (Preference)findPreference("blue_help");
         m_configureButton = (Preference)findPreference("configure_keys");
         m_donateButton = (ListPreference)findPreference("donate_button");
+        m_manageBluetooth = (CheckBoxPreference)findPreference("blue_autoactivate");
         
         //Populate the list, otherwise the app will crash
         m_donateButton.setEntries(new CharSequence[] { getString(R.string.preference_use_paypal) });
         m_donateButton.setEntryValues(new CharSequence[] {"PAYPAL"} );
-        
+                
         try {
         	//This code enables the in-app donation system, but does not require it for compilation
         	//This is done to avoid polluting the project source with all the boilerplate code
@@ -122,6 +124,16 @@ public class BluezIMESettings extends PreferenceActivity {
 				return false;
 			}
 		});
+        
+        m_manageBluetooth.setChecked(m_prefs.getManageBluetooth());
+        m_manageBluetooth.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				m_prefs.setManageBluetooth((Boolean)newValue);
+				return true;
+			}
+		});
+
 
         BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
         if (blue == null)
@@ -163,7 +175,7 @@ public class BluezIMESettings extends PreferenceActivity {
         				ImprovedBluetoothDevice.DeactivateBluetooth(BluezIMESettings.this);
         			} else {
 	        			m_bluetoothActivity.setChecked(false);
-	        			ImprovedBluetoothDevice.ActivateBluetooth(BluezIMESettings.this);
+	        			ImprovedBluetoothDevice.ActivateBluetooth(BluezIMESettings.this, null);
         			}
         			return false;
         		}
@@ -350,6 +362,7 @@ public class BluezIMESettings extends PreferenceActivity {
 			m_drivers.setSummary(BluezService.DRIVER_DISPLAYNAMES[index]);
 		
 		m_configureButton.setEnabled(m_prefs.getSelectedDriverName() != null && m_prefs.getSelectedDriverName().length() > 0);
+		m_manageBluetooth.setChecked(m_prefs.getManageBluetooth());
 	}
     
 	private BroadcastReceiver bluetoothStateMonitor = new BroadcastReceiver() {
