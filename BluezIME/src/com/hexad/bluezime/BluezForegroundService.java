@@ -6,9 +6,12 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
+import android.util.Log;
 
 public class BluezForegroundService extends Service {
 
+	private static final String LOG_NAME = "BluezIME_FG";
+	
 	static final String ACTION_START = "com.hexad.bluezime.START_FG_SERVICE";
 	static final String ACTION_STOP = "com.hexad.bluezime.STOP_FG_SERVICE";
 	private static final int NOTIFICATION_ID = 10; 
@@ -22,15 +25,27 @@ public class BluezForegroundService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		if (ACTION_START.equals(intent.getAction())) {
-    		if (m_connectionCount == 0)
-    			showNotification();
-    		m_connectionCount++;
-			return START_STICKY;
-		} else if (ACTION_STOP.equals(intent.getAction())) {
-			m_connectionCount--;
-			if (m_connectionCount <= 0)
-				stopSelf();
+		if (intent == null) {
+			Log.e(LOG_NAME, "Intent was null");
+		} else {
+			String action = intent.getAction();
+			if (action == null) {
+				Log.e(LOG_NAME, "Action was null");
+			} else {
+				if (ACTION_START.equals(action)) {
+		    		if (m_connectionCount == 0)
+		    			showNotification();
+		    		m_connectionCount++;
+					return START_STICKY;
+				} else if (ACTION_STOP.equals(action)) {
+					m_connectionCount--;
+					if (m_connectionCount <= 0)
+						stopSelf();
+				} else {
+					Log.e(LOG_NAME, "Unknown action: " + action);
+				}
+				
+			}
 		}
     	return START_NOT_STICKY;
 	}
