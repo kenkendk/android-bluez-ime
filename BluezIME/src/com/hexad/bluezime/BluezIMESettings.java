@@ -26,14 +26,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -55,6 +54,7 @@ public class BluezIMESettings extends PreferenceActivity {
 	private Preference m_configureButton;
 	private ListPreference m_donateButton;
 	private CheckBoxPreference m_manageBluetooth;
+	private ListPreference m_wakelockType;
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
@@ -77,18 +77,22 @@ public class BluezIMESettings extends PreferenceActivity {
         m_configureButton = (Preference)findPreference("configure_keys");
         m_donateButton = (ListPreference)findPreference("donate_button");
         m_manageBluetooth = (CheckBoxPreference)findPreference("blue_autoactivate");
+        m_wakelockType = (ListPreference)findPreference("wakelock_type");
         
         //Populate the list, otherwise the app will crash
         m_donateButton.setEntries(new CharSequence[] { getString(R.string.preference_use_paypal) });
         m_donateButton.setEntryValues(new CharSequence[] {"PAYPAL"} );
-                
+
+        m_wakelockType.setEntries(new CharSequence[] { getString(R.string.preference_wakelock_none), getString(R.string.preference_wakelock_full), getString(R.string.preference_wakelock_dim) });
+        m_wakelockType.setEntryValues(new CharSequence[] { Preferences.NO_WAKE_LOCK+"", PowerManager.FULL_WAKE_LOCK+"", PowerManager.SCREEN_DIM_WAKE_LOCK+"" } );
+
         try {
         	//This code enables the in-app donation system, but does not require it for compilation
         	//This is done to avoid polluting the project source with all the boilerplate code
         	dalvik.system.PathClassLoader loader = new dalvik.system.PathClassLoader(this.getPackageCodePath(), java.lang.ClassLoader.getSystemClassLoader());
 
-        	Class c = loader.loadClass("com.hexad.bluezime.donation.DonationObserver");
-        	Constructor cc = c.getDeclaredConstructor(Activity.class);
+        	Class<?> c = loader.loadClass("com.hexad.bluezime.donation.DonationObserver");
+        	Constructor<?> cc = c.getDeclaredConstructor(Activity.class);
         	
         	m_donationObserver = cc.newInstance(this);
         } catch (Exception ex) {
@@ -134,6 +138,24 @@ public class BluezIMESettings extends PreferenceActivity {
 			}
 		});
 
+        m_wakelockType.setOnPreferenceChangeListener(new OnPreferenceChangeListener() {
+			@Override
+			public boolean onPreferenceChange(Preference preference, Object newValue) {
+				if (newValue instanceof String) {
+					int v = -1;
+					
+					try { v = Integer.parseInt((String)newValue); }
+					catch (Throwable t) { }
+					
+					if (v >= 0) {
+						m_prefs.setWakeLock(v);
+						return true;
+					}
+				}
+				
+				return false;
+			}
+		});
 
         BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
         if (blue == null)
@@ -363,6 +385,18 @@ public class BluezIMESettings extends PreferenceActivity {
 		
 		m_configureButton.setEnabled(m_prefs.getSelectedDriverName() != null && m_prefs.getSelectedDriverName().length() > 0);
 		m_manageBluetooth.setChecked(m_prefs.getManageBluetooth());
+		
+		String wakeType = m_prefs.getWakeLock() + "";
+		CharSequence[] wakeValues = m_wakelockType.getEntryValues();
+		m_wakelockType.setSummary("");
+		
+		for(int i = 0; i < wakeValues.length; i++) {
+			if (wakeValues[i].toString().equals(wakeType)) {
+				m_wakelockType.setSummary(m_wakelockType.getEntries()[i]);
+				break;
+			}
+		}
+		
 	}
     
 	private BroadcastReceiver bluetoothStateMonitor = new BroadcastReceiver() {

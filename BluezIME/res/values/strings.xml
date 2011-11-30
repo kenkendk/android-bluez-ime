@@ -53,6 +53,12 @@
 
 <string name="preference_help_short">Help / Support / More</string>
 <string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>
+
+<string name="preference_wakelock_short">Keep screen on</string>
+<string name="preference_wakelock_none">Screen turns off if not used</string>
+<string name="preference_wakelock_full">Keep screen fully lit</string>
+<string name="preference_wakelock_dim">Keep screen on but dim when not used</string>
+    
 <string name="preference_device_unknown">Unknown device selected</string>
 
 <string name="preference_use_paypal">Donate with PayPal</string>

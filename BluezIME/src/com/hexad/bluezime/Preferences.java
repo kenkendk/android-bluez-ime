@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 
 public class Preferences {
@@ -31,6 +32,8 @@ public class Preferences {
 	
 	public static final String PREFERENCES_UPDATED = "com.hexad.bluezime.preferenceschanged";
 
+	public static final int NO_WAKE_LOCK = 0;
+	
 	private static final String PREF_DONATION_AMOUNT = "donation amount";
 	private static final String PREF_DEVICE_NAME = "device name";
 	private static final String PREF_DEVICE_ADDRESS = "device address";
@@ -39,6 +42,7 @@ public class Preferences {
 	private static final String PREF_KEY_MAPPING_PROFILE = "key mapping profile";
 	private static final String PREF_PROFILE_NAME = "profile name";
 	private static final String PREF_MANAGE_BLUETOOTH = "manage bluetooth";
+	private static final String PREF_WAKE_LOCK = "wake lock";
 	
 	private SharedPreferences m_prefs;
 	private Context m_context;
@@ -193,6 +197,29 @@ public class Preferences {
 		e.putBoolean(PREF_MANAGE_BLUETOOTH, value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+	
+	public void setWakeLock(int value) {
+		switch(value)
+		{
+			case PowerManager.FULL_WAKE_LOCK:
+			case PowerManager.PARTIAL_WAKE_LOCK:
+			case PowerManager.SCREEN_BRIGHT_WAKE_LOCK:
+			case PowerManager.SCREEN_DIM_WAKE_LOCK:
+			case NO_WAKE_LOCK:
+				break;
+			default:
+				return;
+		}
+		
+		Editor e = m_prefs.edit();
+		e.putInt(PREF_WAKE_LOCK, value);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+	
+	public int getWakeLock() {
+		return m_prefs.getInt(PREF_WAKE_LOCK, NO_WAKE_LOCK);
 	}
 
 }

@@ -45,8 +45,7 @@ import android.view.WindowManager;
 public class ImprovedBluetoothDevice {
 	public final BluetoothDevice mDevice;
 	
-	@SuppressWarnings("unchecked")
-	private static Method getMethod(Class cls, String name, Class[] args) {
+	private static Method getMethod(Class<?> cls, String name, Class<?>[] args) {
 		try {
 			return cls.getMethod(name, args);
 		} catch (Exception ex) {
@@ -54,10 +53,9 @@ public class ImprovedBluetoothDevice {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	private static Constructor getConstructor(Class cls, Class[] args) {
+	private static Constructor<?> getConstructor(Class<?> cls, Class<?>[] args) {
 		try {
-			Constructor c = cls.getDeclaredConstructor(args);
+			Constructor<?> c = cls.getDeclaredConstructor(args);
 			if (!c.isAccessible())
 				c.setAccessible(true);
 			return c;
@@ -138,15 +136,15 @@ public class ImprovedBluetoothDevice {
 		dlg.show();
 	}
 	
-	private static final int TYPE_RFCOMM = 1;
-	private static final int TYPE_SCO = 2;
+	//private static final int TYPE_RFCOMM = 1;
+	//private static final int TYPE_SCO = 2;
 	private static final int TYPE_L2CAP = 3;
 	
 	private static final Method _createRfcommSocket = getMethod(BluetoothDevice.class, "createRfcommSocket", new Class[] { int.class });
 	private static final Method _createInsecureRfcommSocket = getMethod(BluetoothDevice.class, "createInsecureRfcommSocket", new Class[] { int.class });
 	private static final Method _setPin = getMethod(BluetoothDevice.class, "setPin", new Class[] { byte[].class });
 	private static final Method _setPasskey = getMethod(BluetoothDevice.class, "setPasskey", new Class[] { int.class });
-	private static final Constructor _socketConstructor = getConstructor(BluetoothSocket.class, new Class[] {int.class, int.class, boolean.class, boolean.class, BluetoothDevice.class, int.class, ParcelUuid.class});
+	private static final Constructor<?> _socketConstructor = getConstructor(BluetoothSocket.class, new Class[] {int.class, int.class, boolean.class, boolean.class, BluetoothDevice.class, int.class, ParcelUuid.class});
 	
 	public ImprovedBluetoothDevice(BluetoothDevice base) {
 		if (base == null)

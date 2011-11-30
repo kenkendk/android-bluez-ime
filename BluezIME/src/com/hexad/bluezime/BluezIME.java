@@ -26,6 +26,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.inputmethodservice.InputMethodService;
+import android.os.PowerManager;
 import android.os.SystemClock;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -36,7 +37,7 @@ import android.widget.Toast;
 
 public class BluezIME extends InputMethodService {
 
-	private static final String SESSION_ID = "BLUEZ-IME-KEYBOARD";
+	private static final String SESSION_ID = "com.hexad.bluezime.ime.controller";
 	
 	private static final boolean D = false;
 	private static final String LOG_NAME = "BluezInput";
@@ -46,6 +47,9 @@ public class BluezIME extends InputMethodService {
 	private NotificationManager m_notificationManager;
 	private Notification m_notification;
 	private int[] m_keyMappingCache = null;
+	
+	private PowerManager.WakeLock m_wakelock = null;
+	private int m_wakelocktype = 0;
 	
 	@Override
 	public void onCreate() {
@@ -57,8 +61,9 @@ public class BluezIME extends InputMethodService {
 		m_keyMappingCache = new int[Math.max(0x100, KeyEvent.getMaxKeyCode())];
 		for(int i = 0; i < m_keyMappingCache.length; i++)
 			m_keyMappingCache[i] = -1;
-		
+				
 		setNotificationText(getString(R.string.ime_starting));
+		acquireWakeLock();
 
         registerReceiver(connectReceiver, new IntentFilter(BluezService.EVENT_CONNECTED));
         registerReceiver(connectingReceiver, new IntentFilter(BluezService.EVENT_CONNECTING));
@@ -75,6 +80,32 @@ public class BluezIME extends InputMethodService {
 		PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
 		m_notification.setLatestEventInfo(this, getString(R.string.app_name), message, pi);
 		m_notificationManager.notify(1, m_notification);
+	}
+	
+	private void acquireWakeLock() {
+		if (m_wakelock == null) {
+			int wakelocktype = m_prefs.getWakeLock();
+			if (wakelocktype != Preferences.NO_WAKE_LOCK) {
+				try 
+				{ 
+					m_wakelock = ((PowerManager) getSystemService(Context.POWER_SERVICE)).newWakeLock(wakelocktype, "com.hexad.bluezime.WakeLock"); 
+					m_wakelock.acquire();
+					m_wakelocktype = wakelocktype;
+				}
+				catch (Throwable e) {
+					if (D) Log.e(LOG_NAME, e.getMessage());
+				}
+				
+			}
+		}
+	}
+	
+	private void releaseWakeLock() {
+		if (m_wakelock != null) {
+			m_wakelock.release();
+			m_wakelock = null;
+			m_wakelocktype = 0;
+		}
 	}
 
 	@Override
@@ -166,6 +197,8 @@ public class BluezIME extends InputMethodService {
 			i.putExtra(BluezService.SESSION_ID, SESSION_ID);
 			startService(i);
 		}
+		
+		releaseWakeLock();
 		
         unregisterReceiver(connectReceiver);
         unregisterReceiver(connectingReceiver);
@@ -259,6 +292,11 @@ public class BluezIME extends InputMethodService {
 			
 			if (m_connected)
 				connect();
+			
+			if (m_wakelocktype != m_prefs.getWakeLock()) {
+				releaseWakeLock();
+				acquireWakeLock();
+			}
 		}
 	};
 
