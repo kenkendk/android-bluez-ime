@@ -34,6 +34,8 @@ public class Preferences {
 
 	public static final int NO_WAKE_LOCK = 0;
 	
+	public static final int MAX_NO_OF_CONTROLLERS = 4;
+	
 	private static final String PREF_DONATION_AMOUNT = "donation amount";
 	private static final String PREF_DEVICE_NAME = "device name";
 	private static final String PREF_DEVICE_ADDRESS = "device address";
@@ -41,6 +43,7 @@ public class Preferences {
 	private static final String PREF_KEY_MAPPING = "key mapping";
 	private static final String PREF_KEY_MAPPING_PROFILE = "key mapping profile";
 	private static final String PREF_PROFILE_NAME = "profile name";
+	private static final String PREF_CONTROLLER_COUNT = "controller count";
 	private static final String PREF_MANAGE_BLUETOOTH = "manage bluetooth";
 	private static final String PREF_WAKE_LOCK = "wake lock";
 	
@@ -52,54 +55,59 @@ public class Preferences {
 		m_context = context;
 	}
 	
-	public String getSelectedDriverName() {
-		return m_prefs.getString(PREF_DRIVER_NAME, BluezService.DEFAULT_DRIVER_NAME);
+	private static String getSuffix(int pos) {
+		return pos < 1 ? "" : (" #" + pos);
+			
 	}
 	
-	public void setSelectedDriverName(String value) {
+	public String getSelectedDriverName(int pos) {
+		return m_prefs.getString(PREF_DRIVER_NAME + getSuffix(pos), BluezService.DEFAULT_DRIVER_NAME);
+	}
+	
+	public void setSelectedDriverName(String value, int pos) {
 		Editor e = m_prefs.edit();
-		e.putString(PREF_DRIVER_NAME, value);
+		e.putString(PREF_DRIVER_NAME + getSuffix(pos), value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 
-	public String getSelectedDeviceName() {
-		return m_prefs.getString(PREF_DEVICE_NAME, null);
+	public String getSelectedDeviceName(int pos) {
+		return m_prefs.getString(PREF_DEVICE_NAME + getSuffix(pos), null);
 	}
 	
-	public void setSelectedDeviceName(String value) {
+	public void setSelectedDeviceName(String value, int pos) {
 		Editor e = m_prefs.edit();
-		e.putString(PREF_DEVICE_NAME, value);
+		e.putString(PREF_DEVICE_NAME + getSuffix(pos), value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 
-	public String getSelectedDeviceAddress() {
-		return m_prefs.getString(PREF_DEVICE_ADDRESS, null);
+	public String getSelectedDeviceAddress(int pos) {
+		return m_prefs.getString(PREF_DEVICE_ADDRESS + getSuffix(pos), null);
 	}
 	
-	public void setSelectedDeviceAddress(String value) {
+	public void setSelectedDeviceAddress(String value, int pos) {
 		Editor e = m_prefs.edit();
-		e.putString(PREF_DEVICE_ADDRESS, value);
+		e.putString(PREF_DEVICE_ADDRESS + getSuffix(pos), value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 
-	public void setSelectedDevice(String name, String address) {
+	public void setSelectedDevice(String name, String address, int pos) {
 		Editor e = m_prefs.edit();
-		e.putString(getCurrentProfile() + PREF_DEVICE_NAME, name);
-		e.putString(getCurrentProfile() + PREF_DEVICE_ADDRESS, address);
+		e.putString(getCurrentProfile() + PREF_DEVICE_NAME + getSuffix(pos), name);
+		e.putString(getCurrentProfile() + PREF_DEVICE_ADDRESS + getSuffix(pos), address);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
 	
-	public int getKeyMapping(int key) {
-		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName() + "-" + Integer.toHexString(key); 
+	public int getKeyMapping(int key, int controllerNo) {
+		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-" + Integer.toHexString(key); 
 		return m_prefs.getInt(mapping, key);
 	}
 	
-	public void setKeyMapping(int fromKey, int toKey) {
-		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName() + "-" + Integer.toHexString(fromKey); 
+	public void setKeyMapping(int fromKey, int toKey, int controllerNo) {
+		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-" + Integer.toHexString(fromKey); 
 		Editor e = m_prefs.edit();
 		e.putInt(mapping, toKey);
 		e.commit();
@@ -128,8 +136,8 @@ public class Preferences {
 		clearByPrefix(profilename + ":");
 	}
 
-	public void clearKeyMappings() {
-		clearByPrefix(getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName() + "-");
+	public void clearKeyMappings(int controllerNo) {
+		clearByPrefix(getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-");
 	}
 	
 	private void clearByPrefix(String prefix) {
@@ -192,12 +200,24 @@ public class Preferences {
 		return m_prefs.getBoolean(PREF_MANAGE_BLUETOOTH, true);
 	}
 	
+	public int getControllerCount() {
+		return m_prefs.getInt(PREF_CONTROLLER_COUNT, 1);
+	}
+
+	public void setControllerCount(int count) {
+		Editor e = m_prefs.edit();
+		e.putInt(PREF_CONTROLLER_COUNT, count);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+
 	public void setManageBluetooth(boolean value) {
 		Editor e = m_prefs.edit();
 		e.putBoolean(PREF_MANAGE_BLUETOOTH, value);
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
+
 	
 	public void setWakeLock(int value) {
 		switch(value)

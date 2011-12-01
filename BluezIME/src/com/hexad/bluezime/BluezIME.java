@@ -41,7 +41,7 @@ public class BluezIME extends InputMethodService {
 	
 	private static final boolean D = false;
 	private static final String LOG_NAME = "BluezInput";
-	private boolean m_connected = false;
+	private final String[] m_connectedIds = new String[Preferences.MAX_NO_OF_CONTROLLERS];
 	private Preferences m_prefs;
 	
 	private NotificationManager m_notificationManager;
@@ -107,6 +107,15 @@ public class BluezIME extends InputMethodService {
 			m_wakelocktype = 0;
 		}
 	}
+	
+	private int getConnectedCount() {
+		int count = 0;
+		for(int i = 0; i < m_connectedIds.length; i++)
+			if (m_connectedIds[i] != null)
+				count++;
+		
+		return count;
+	}
 
 	@Override
 	public View onCreateInputView() {
@@ -126,7 +135,7 @@ public class BluezIME extends InputMethodService {
 		
 		if (D) Log.d(LOG_NAME, "Start input view");
 
-        if (!m_connected)
+        if (getConnectedCount() != m_prefs.getControllerCount())
         	connect();
 	}
 
@@ -135,14 +144,12 @@ public class BluezIME extends InputMethodService {
 		super.onStartInput(attribute, restarting);
 		
 		//Reconnect if we lost connection
-		if (!m_connected)
+		if (getConnectedCount() != m_prefs.getControllerCount())
 			connect();
 	}
 	
 	private void connect() {
     	if (D) Log.d(LOG_NAME, "Connecting");
-    	String address = m_prefs.getSelectedDeviceAddress();
-    	String driver = m_prefs.getSelectedDriverName();
     	
     	if (m_prefs.getManageBluetooth()) {
 	    	try {
@@ -166,13 +173,18 @@ public class BluezIME extends InputMethodService {
 	    	}
     	}
     	
-		Intent i = new Intent(this, BluezService.class);
-		i.setAction(BluezService.REQUEST_CONNECT);
-		i.putExtra(BluezService.REQUEST_CONNECT_ADDRESS, address);
-		i.putExtra(BluezService.REQUEST_CONNECT_DRIVER, driver);
-		i.putExtra(BluezService.SESSION_ID, SESSION_ID);
-		i.putExtra(BluezService.REQUEST_CONNECT_CREATE_NOTIFICATION, false);
-		startService(i);
+    	for(int i = 0; i < m_prefs.getControllerCount(); i++) {
+	    	String address = m_prefs.getSelectedDeviceAddress(i);
+	    	String driver = m_prefs.getSelectedDriverName(i);
+	
+	    	Intent intent = new Intent(this, BluezService.class);
+	    	intent.setAction(BluezService.REQUEST_CONNECT);
+	    	intent.putExtra(BluezService.REQUEST_CONNECT_ADDRESS, address);
+	    	intent.putExtra(BluezService.REQUEST_CONNECT_DRIVER, driver);
+	    	intent.putExtra(BluezService.SESSION_ID, SESSION_ID + i);
+	    	intent.putExtra(BluezService.REQUEST_CONNECT_CREATE_NOTIFICATION, false);
+			startService(intent);
+    	}
 	}
 	
 	@Override
@@ -190,12 +202,17 @@ public class BluezIME extends InputMethodService {
 		
 		m_notificationManager.cancel(1);
 		
-		if (m_connected) {
+		if (getConnectedCount() > 0) {
 			if (D) Log.d(LOG_NAME, "Disconnecting");
-			Intent i = new Intent(this, BluezService.class);
-			i.setAction(BluezService.REQUEST_DISCONNECT);
-			i.putExtra(BluezService.SESSION_ID, SESSION_ID);
-			startService(i);
+
+			for(int i = 0; i < m_connectedIds.length; i++) {
+				if (m_connectedIds[i] != null) {
+					Intent intent = new Intent(this, BluezService.class);
+					intent.setAction(BluezService.REQUEST_DISCONNECT);
+					intent.putExtra(BluezService.SESSION_ID, m_connectedIds[i]);
+					startService(intent);
+				}
+			}
 		}
 		
 		releaseWakeLock();
@@ -232,7 +249,7 @@ public class BluezIME extends InputMethodService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String sid = intent.getStringExtra(BluezService.SESSION_ID);
-			if (sid == null || !sid.equals(SESSION_ID))
+			if (sid == null || !sid.startsWith(SESSION_ID))
 				return;
 			
 			String address = intent.getStringExtra(BluezService.EVENT_CONNECTING_ADDRESS);
@@ -245,12 +262,19 @@ public class BluezIME extends InputMethodService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String sid = intent.getStringExtra(BluezService.SESSION_ID);
-			if (sid == null || !sid.equals(SESSION_ID))
+			if (sid == null || !sid.startsWith(SESSION_ID))
 				return;
 
+			int controllerNo = -1;
+			try { controllerNo = Integer.parseInt(sid.substring(SESSION_ID.length())); }
+			catch (Throwable t) { if (D) Log.w(LOG_NAME, "Failed to parse connectId: " + sid); }
+
+			if (controllerNo < 0 || controllerNo >= m_connectedIds.length)
+				return;
+			
 			if (D) Log.d(LOG_NAME, "Connect received");
 			Toast.makeText(context, String.format(context.getString(R.string.connected_to_device_message), intent.getStringExtra(BluezService.EVENT_CONNECTED_ADDRESS)), Toast.LENGTH_SHORT).show();
-			m_connected = true;
+			m_connectedIds[controllerNo] = sid;
 			setNotificationText(String.format(getString(R.string.ime_connected), intent.getStringExtra(BluezService.EVENT_CONNECTED_ADDRESS)));
 		}
 	};
@@ -259,12 +283,16 @@ public class BluezIME extends InputMethodService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String sid = intent.getStringExtra(BluezService.SESSION_ID);
-			if (sid == null || !sid.equals(SESSION_ID))
+			if (sid == null || !sid.startsWith(SESSION_ID))
 				return;
 
 			if (D) Log.d(LOG_NAME, "Disconnect received");
 			Toast.makeText(context, String.format(context.getString(R.string.disconnected_from_device_message), intent.getStringExtra(BluezService.EVENT_DISCONNECTED_ADDRESS)), Toast.LENGTH_SHORT).show();
-			m_connected = false;
+			for(int i = 0; i < m_connectedIds.length; i++) {
+				if (sid.equals(m_connectedIds[i]))
+					m_connectedIds[i] = null;
+			}
+			
 			setNotificationText(getString(R.string.ime_disconnected));
 		}
 	};
@@ -273,7 +301,7 @@ public class BluezIME extends InputMethodService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String sid = intent.getStringExtra(BluezService.SESSION_ID);
-			if (sid == null || !sid.equals(SESSION_ID))
+			if (sid == null || !sid.startsWith(SESSION_ID))
 				return;
 
 			if (D) Log.d(LOG_NAME, "Error received");
@@ -290,7 +318,7 @@ public class BluezIME extends InputMethodService {
 			for(int i = 0; i < m_keyMappingCache.length; i++)
 				m_keyMappingCache[i] = -1;
 			
-			if (m_connected)
+			if (getConnectedCount() > 0)
 				connect();
 			
 			if (m_wakelocktype != m_prefs.getWakeLock()) {
@@ -304,12 +332,15 @@ public class BluezIME extends InputMethodService {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			String sid = intent.getStringExtra(BluezService.SESSION_ID);
-			if (sid == null || !sid.equals(SESSION_ID))
+			if (sid == null || !sid.startsWith(SESSION_ID))
 				return;
+			
 
 			if (D) Log.d(LOG_NAME, "Update event received");
 			
 			try {
+				int controllerNo = Integer.parseInt(sid.substring(SESSION_ID.length()));
+
 				InputConnection ic = getCurrentInputConnection();
 				long eventTime = SystemClock.uptimeMillis();
 
@@ -325,7 +356,7 @@ public class BluezIME extends InputMethodService {
 					} else {
 						int translatedKey = m_keyMappingCache[key];
 						if (translatedKey == -1) {
-							translatedKey = m_prefs.getKeyMapping(key);
+							translatedKey = m_prefs.getKeyMapping(key, controllerNo);
 							m_keyMappingCache[key] = translatedKey;
 						} 
 						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key);
@@ -344,26 +375,9 @@ public class BluezIME extends InputMethodService {
 		public void onReceive(Context context, Intent intent) {
 			int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, 0);
 			if (state == BluetoothAdapter.STATE_ON) {
-				if (!m_connected)
+				if (getConnectedCount() == 0)
 					connect();
 			}
 		}
 	};
-	
-
-	
-	//Deprecated, could be used to simulate hardware keypress
-	/*final IWindowManager windowManager = IWindowManager.Stub.asInterface(ServiceManager.getService("window"));
-	
-    private void doInjectKeyEvent(KeyEvent kEvent) {
-        try {
-                // Inject the KeyEvent to the Window-Manager.
-                windowManager.injectKeyEvent(kEvent.isDown(), kEvent.getKeyCode(),
-                                kEvent.getRepeatCount(), kEvent.getDownTime(), kEvent
-                                                .getEventTime(), true);
-        } catch (DeadObjectException e) {
-                e.printStackTrace();
-        }
-    }*/	
-
 }

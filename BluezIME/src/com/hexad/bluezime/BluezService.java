@@ -162,9 +162,9 @@ public class BluezService extends IntentService {
 				Preferences p = new Preferences(this);
 
 				if (address == null)
-					address = p.getSelectedDeviceAddress();
+					address = p.getSelectedDeviceAddress(0);
 				if (driver == null)
-					driver = p.getSelectedDriverName();
+					driver = p.getSelectedDriverName(0);
 	            
 	            if (!use_ui) {
 	            	Log.w(LOG_NAME, "No driver/address set for connect request, please update your application. If this is intentional, please set the option " + REQUEST_CONNECT_USE_UI + " to true");

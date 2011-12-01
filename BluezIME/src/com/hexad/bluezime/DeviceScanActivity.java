@@ -43,6 +43,7 @@ public class DeviceScanActivity extends Activity {
 
 	private static final int DO_SCAN_AFTER_ENABLE = 1;
 	public static final String EXTRA_DEVICE = "device";
+	public static final String EXTRA_CONTROLLER = "controller";
 	
 	private TextView m_knownDeviceLabel;
 	private ListView m_knownDeviceList;
@@ -52,7 +53,9 @@ public class DeviceScanActivity extends Activity {
 	private Button m_scanButton;
 	private BluetoothAdapter m_bluetoothAdapter;
 	
-	ArrayList<BluetoothDevice> m_foundDevices;
+	private ArrayList<BluetoothDevice> m_foundDevices;
+	
+	private int m_controller = 0;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +64,8 @@ public class DeviceScanActivity extends Activity {
 		setContentView(R.layout.devicelist);
 		
 		setResult(Activity.RESULT_CANCELED);
+		
+		m_controller = this.getIntent().getIntExtra(EXTRA_CONTROLLER, 0);
 		
 		m_knownDeviceLabel = (TextView)findViewById(R.id.PairedDeviceLabel);
 		m_knownDeviceList = (ListView)findViewById(R.id.PairedDeviceList);
@@ -148,6 +153,7 @@ public class DeviceScanActivity extends Activity {
 	private void deviceSelected(BluetoothDevice device) {
         Intent intent = new Intent();
         intent.putExtra(EXTRA_DEVICE, device);
+        intent.putExtra(EXTRA_CONTROLLER, m_controller);
 
         setResult(Activity.RESULT_OK, intent);
         finish();

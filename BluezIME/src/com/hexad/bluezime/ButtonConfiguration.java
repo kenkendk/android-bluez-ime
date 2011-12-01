@@ -42,6 +42,9 @@ public class ButtonConfiguration extends PreferenceActivity {
 	private EditTextPreference m_presetName;
 	private Hashtable<Integer, String> m_name_lookup;
 	private Hashtable<Preference, Integer> m_list_lookup;
+	private int m_controllerIndex = 0;
+
+	public static final String EXTRA_CONTROLLER = "controller";
 
 	public class AndroidNewKeys {
 		//These are from API level 9
@@ -58,12 +61,14 @@ public class ButtonConfiguration extends PreferenceActivity {
 		public static final int KEYCODE_BUTTON_START = 0x6c; 
 		public static final int KEYCODE_BUTTON_SELECT = 0x6d; 
 	}
-	
+			
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.buttonconfiguration);
 		
+		m_controllerIndex = this.getIntent().getIntExtra("controller", 0);
+
 		m_prefs = new Preferences(this);
 		
 		m_presets = (ListPreference)this.findPreference("select_preset");
@@ -114,7 +119,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 				} catch (Exception e) {	}
 		}
 		
-		String driver = m_prefs.getSelectedDriverName();
+		String driver = m_prefs.getSelectedDriverName(m_controllerIndex);
 		
 		int[] buttonCodes;
 		int[] buttonNames; 
@@ -144,7 +149,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 		resetButton.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
 			public boolean onPreferenceClick(Preference preference) {
-				m_prefs.clearKeyMappings();
+				m_prefs.clearKeyMappings(m_controllerIndex);
 				return true;
 			}
 		});
@@ -178,7 +183,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 				public boolean onPreferenceChange(Preference preference, Object newValue) {
 					int fromKey = m_list_lookup.get(preference);
 					int toKey = Integer.parseInt((String)newValue);
-					m_prefs.setKeyMapping(fromKey, toKey);
+					m_prefs.setKeyMapping(fromKey, toKey, m_controllerIndex);
 					return true;
 				}
 			});
@@ -200,7 +205,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 	private void updateDisplay() {
 		for(Preference p : Collections.list(m_list_lookup.keys())) {
 			ListPreference lp = (ListPreference)p;
-			int code = m_prefs.getKeyMapping(m_list_lookup.get(p));
+			int code = m_prefs.getKeyMapping(m_list_lookup.get(p), m_controllerIndex);
 			lp.setSummary(m_name_lookup.containsKey(code) ? m_name_lookup.get(code) : "UNKNOWN - 0x" + Integer.toHexString(code));	
 			lp.setValue(Integer.toString(code));
 		}
