@@ -33,8 +33,7 @@
 	<activity android:name="DeviceScanActivity" android:label="@string/scan_title" />
 	<activity android:name="ButtonConfiguration" android:label="@string/button_config_title" />
 
-    <activity android:name="BluezIMESettings" android:label="@string/settings_title" 
-    	android:permission="android.permission.BLUETOOTH_ADMIN">
+    <activity android:name="BluezIMESettings" android:label="@string/settings_title"> 
 	    <intent-filter>
 	        <action android:name="android.intent.action.MAIN"/>
 	        <category android:name="android.intent.category.LAUNCHER" />
