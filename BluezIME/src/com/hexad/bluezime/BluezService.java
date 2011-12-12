@@ -271,12 +271,14 @@ public class BluezService extends IntentService {
 	
 	private synchronized void connectToDevice(String address, String driver, String sessionId, boolean startnotification) {
 		try {
-			if (address == null || address.trim().length() == 0)
-				throw new Exception("Invalid call, no address specified");
-			if (driver == null || driver.trim().length() == 0)
-				throw new Exception("Invalid call, no driver specified");
 			if (sessionId == null || sessionId.trim().length() == 0)
-				throw new Exception("Invalid call, no session id specified");
+				throw new Exception("Invalid call, no session id specified, this is an API violation, please report to the app maker");
+			if (driver == null || driver.trim().length() == 0)
+				throw new Exception("Invalid call, no driver specified, this is an API violation, please report to the app maker");
+
+			//The error message is slightly different here because it is possible for the user to activate the IME without selecting a device
+			if (address == null || address.trim().length() == 0)
+				throw new Exception("No device selected, please select a device");
 
 			BluetoothAdapter blue = BluetoothAdapter.getDefaultAdapter();
 			if (blue == null)
