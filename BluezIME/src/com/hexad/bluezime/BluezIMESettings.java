@@ -477,7 +477,7 @@ public class BluezIMESettings extends PreferenceActivity {
 				pd.setSummary(m_prefs.getSelectedDeviceName(i) + " - " + address);
 	
 				CharSequence[] items = pd.getEntryValues();
-				for(int j = 0; i < items.length; j++)
+				for(int j = 0; j < items.length; j++)
 					if (items[j].equals(address)) {
 						pd.setValueIndex(j);
 						break;

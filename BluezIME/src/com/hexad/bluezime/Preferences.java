@@ -27,8 +27,8 @@ import android.preference.PreferenceManager;
 
 public class Preferences {
 	
-	public static final String[] PROFILE_NAMES = new String[] {"<default>", "Profile 2", "Profile 3", "Profile 4", "Profile 5" };
-	public static final String[] PROFILE_KEYS = new String[] {"", "Profile2", "Profile3", "Profile4", "Profile5" };
+	public static final String[] PROFILE_NAMES = new String[] {"<default>", "Profile 2", "Profile 3", "Profile 4", "Profile 5", "Profile 6", "Profile 7", "Profile 8", "Profile 9", "Profile 10" };
+	public static final String[] PROFILE_KEYS = new String[] {"", "Profile2", "Profile3", "Profile4", "Profile5", "Profile6", "Profile7", "Profile8", "Profile9", "Profile10" };
 	
 	public static final String PREFERENCES_UPDATED = "com.hexad.bluezime.preferenceschanged";
 
@@ -102,12 +102,12 @@ public class Preferences {
 	}
 	
 	public int getKeyMapping(int key, int controllerNo) {
-		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-" + Integer.toHexString(key); 
+		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(key); 
 		return m_prefs.getInt(mapping, key);
 	}
 	
 	public void setKeyMapping(int fromKey, int toKey, int controllerNo) {
-		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-" + Integer.toHexString(fromKey); 
+		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(fromKey); 
 		Editor e = m_prefs.edit();
 		e.putInt(mapping, toKey);
 		e.commit();
@@ -137,7 +137,7 @@ public class Preferences {
 	}
 
 	public void clearKeyMappings(int controllerNo) {
-		clearByPrefix(getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + "-");
+		clearByPrefix(getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-");
 	}
 	
 	private void clearByPrefix(String prefix) {
