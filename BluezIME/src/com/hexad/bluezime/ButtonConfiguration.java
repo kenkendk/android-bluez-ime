@@ -45,22 +45,6 @@ public class ButtonConfiguration extends PreferenceActivity {
 	private int m_controllerIndex = 0;
 
 	public static final String EXTRA_CONTROLLER = "controller";
-
-	public class AndroidNewKeys {
-		//These are from API level 9
-		public static final int KEYCODE_BUTTON_A = 0x60;
-		public static final int KEYCODE_BUTTON_B = 0x61;
-		public static final int KEYCODE_BUTTON_C = 0x62;
-		public static final int KEYCODE_BUTTON_X = 0x63;
-		public static final int KEYCODE_BUTTON_Y = 0x64;
-		public static final int KEYCODE_BUTTON_Z = 0x65;
-		public static final int KEYCODE_BUTTON_L1 = 0x66;
-		public static final int KEYCODE_BUTTON_R1 = 0x67;
-		public static final int KEYCODE_BUTTON_L2 = 0x68;
-		public static final int KEYCODE_BUTTON_R2 = 0x69;
-		public static final int KEYCODE_BUTTON_START = 0x6c; 
-		public static final int KEYCODE_BUTTON_SELECT = 0x6d; 
-	}
 			
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -109,7 +93,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 		}
 		
 		//Support for sane(r) names in Android < 2.3
-		for (Field f : AndroidNewKeys.class.getDeclaredFields()) {
+		for (Field f : FutureKeyCodes.class.getDeclaredFields()) {
 			String name = f.getName();
 			if (name.startsWith("KEYCODE_"))
 				try {
@@ -118,7 +102,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 						m_name_lookup.put(keyCode, name.substring("KEYCODE_".length()));
 				} catch (Exception e) {	}
 		}
-		
+
 		String driver = m_prefs.getSelectedDriverName(m_controllerIndex);
 		
 		int[] buttonCodes;
@@ -155,8 +139,8 @@ public class ButtonConfiguration extends PreferenceActivity {
 		});
 		
 		
-		CharSequence[] entries = new CharSequence[KeyEvent.getMaxKeyCode()];
-		CharSequence[] entryValues = new CharSequence[KeyEvent.getMaxKeyCode()];
+		CharSequence[] entries = new CharSequence[Math.max(KeyEvent.getMaxKeyCode(), m_name_lookup.size())];
+		CharSequence[] entryValues = new CharSequence[entries.length];
 		
 		for(int i = 0; i < entries.length; i++)
 		{
