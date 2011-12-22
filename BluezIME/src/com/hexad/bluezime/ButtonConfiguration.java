@@ -20,6 +20,7 @@ package com.hexad.bluezime;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -41,6 +42,7 @@ public class ButtonConfiguration extends PreferenceActivity {
 	private ListPreference m_presets;
 	private EditTextPreference m_presetName;
 	private Hashtable<Integer, String> m_name_lookup;
+	private Hashtable<Integer, String> m_meta_name_lookup;
 	private Hashtable<Preference, Integer> m_list_lookup;
 	private int m_controllerIndex = 0;
 
@@ -84,11 +86,16 @@ public class ButtonConfiguration extends PreferenceActivity {
 		
 		//Use reflection to build a list of possible keys we can send
 		m_name_lookup = new Hashtable<Integer, String>();
+		m_meta_name_lookup = new Hashtable<Integer, String>();
 		for (Field f : KeyEvent.class.getDeclaredFields()) {
 			String name = f.getName();
 			if (name.startsWith("KEYCODE_"))
 				try {
 					m_name_lookup.put(f.getInt(null), name.substring("KEYCODE_".length()));
+				} catch (Exception e) {	}
+			else if (name.startsWith("META_") && name.endsWith("_ON"))
+				try {
+					m_meta_name_lookup.put(f.getInt(null), name.substring("META_".length(), name.length() - "_ON".length()));
 				} catch (Exception e) {	}
 		}
 		
@@ -100,6 +107,10 @@ public class ButtonConfiguration extends PreferenceActivity {
 					int keyCode = f.getInt(null);
 					if (!m_name_lookup.containsKey(keyCode))
 						m_name_lookup.put(keyCode, name.substring("KEYCODE_".length()));
+				} catch (Exception e) {	}
+			else if (name.startsWith("META_") && name.endsWith("_ON"))
+				try {
+					m_meta_name_lookup.put(f.getInt(null), name.substring("META_".length(), name.length() - "_ON".length()));
 				} catch (Exception e) {	}
 		}
 
@@ -138,17 +149,30 @@ public class ButtonConfiguration extends PreferenceActivity {
 			}
 		});
 		
+		int max_keyvalue = 0;
+		for(Integer i : m_name_lookup.keySet())
+			max_keyvalue = Math.max(max_keyvalue, i);
 		
-		CharSequence[] entries = new CharSequence[Math.max(KeyEvent.getMaxKeyCode(), m_name_lookup.size())];
+		int meta_keys = m_meta_name_lookup.size();
+		
+		CharSequence[] entries = new CharSequence[max_keyvalue + 1 + meta_keys];
 		CharSequence[] entryValues = new CharSequence[entries.length];
+		
+		Integer[] meta_key_set = m_meta_name_lookup.keySet().toArray(new Integer[m_meta_name_lookup.size()]);
 		
 		for(int i = 0; i < entries.length; i++)
 		{
-			if (m_name_lookup.containsKey(i))
-				entries[i] = m_name_lookup.get(i);
-			else
-				entries[i] = "UNKNOWN - 0x" + Integer.toHexString(i);
-			entryValues[i] =  Integer.toString(i);
+			if (i > max_keyvalue) {
+				int ix = i - max_keyvalue - 1;
+				entries[i] = String.format(this.getString(R.string.configuration_toggle_meta), m_meta_name_lookup.get(meta_key_set[ix]));
+				entryValues[i] = "META_" + meta_key_set[ix].toString();
+			} else {
+				if (m_name_lookup.containsKey(i))
+					entries[i] = m_name_lookup.get(i);
+				else
+					entries[i] = "UNKNOWN - 0x" + Integer.toHexString(i);
+				entryValues[i] =  Integer.toString(i);
+			}
 		}
 		
 		m_list_lookup = new Hashtable<Preference, Integer>();
@@ -166,12 +190,25 @@ public class ButtonConfiguration extends PreferenceActivity {
 				@Override
 				public boolean onPreferenceChange(Preference preference, Object newValue) {
 					int fromKey = m_list_lookup.get(preference);
-					int toKey = Integer.parseInt((String)newValue);
-					m_prefs.setKeyMapping(fromKey, toKey, m_controllerIndex);
-					return true;
+					String nv = (String)newValue;
+					
+					if (nv.startsWith("META_")) {
+						int metaKey = Integer.parseInt(nv.substring("META_".length()));
+						int curMeta = m_prefs.getMetaKeyMapping(fromKey, m_controllerIndex);
+						if ((curMeta & metaKey) == 0)
+							curMeta |= metaKey;
+						else
+							curMeta &= ~metaKey;
+						m_prefs.setMetaKeyMapping(fromKey, curMeta, m_controllerIndex);
+						return false;
+					} else {
+						int toKey = Integer.parseInt((String)nv);
+						m_prefs.setKeyMapping(fromKey, toKey, m_controllerIndex);						
+						return true;
+					}
 				}
 			});
-			
+						
 			buttonCategory.addPreference(lp);
 		}
 		
@@ -190,7 +227,15 @@ public class ButtonConfiguration extends PreferenceActivity {
 		for(Preference p : Collections.list(m_list_lookup.keys())) {
 			ListPreference lp = (ListPreference)p;
 			int code = m_prefs.getKeyMapping(m_list_lookup.get(p), m_controllerIndex);
-			lp.setSummary(m_name_lookup.containsKey(code) ? m_name_lookup.get(code) : "UNKNOWN - 0x" + Integer.toHexString(code));	
+			String keycode = m_name_lookup.containsKey(code) ? m_name_lookup.get(code) : "UNKNOWN - 0x" + Integer.toHexString(code); 
+			int metacode = m_prefs.getMetaKeyMapping(m_list_lookup.get(p), m_controllerIndex);
+			
+			for(Integer i : m_meta_name_lookup.keySet()) {
+				if ((metacode & i) != 0)
+					keycode = m_meta_name_lookup.get(i) + " + " + keycode;
+			}
+
+			lp.setSummary(keycode);	
 			lp.setValue(Integer.toString(code));
 		}
 		

@@ -41,6 +41,7 @@ public class Preferences {
 	private static final String PREF_DEVICE_ADDRESS = "device address";
 	private static final String PREF_DRIVER_NAME = "driver name";
 	private static final String PREF_KEY_MAPPING = "key mapping";
+	private static final String PREF_META_KEY_MAPPING = "meta key mapping";
 	private static final String PREF_KEY_MAPPING_PROFILE = "key mapping profile";
 	private static final String PREF_PROFILE_NAME = "profile name";
 	private static final String PREF_CONTROLLER_COUNT = "controller count";
@@ -113,7 +114,20 @@ public class Preferences {
 		e.commit();
 		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
 	}
+
+	public int getMetaKeyMapping(int sourceKey, int controllerNo) {
+		String mapping = getCurrentProfile() + PREF_META_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(sourceKey); 
+		return m_prefs.getInt(mapping, 0);
+	}
 	
+	public void setMetaKeyMapping(int sourceKey, int metaKey, int controllerNo) {
+		String mapping = getCurrentProfile() + PREF_META_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(sourceKey); 
+		Editor e = m_prefs.edit();
+		e.putInt(mapping, metaKey);
+		e.commit();
+		m_context.sendBroadcast(new Intent(PREFERENCES_UPDATED));
+	}
+
 	public void setCurrentProfile(String value) {
 		Editor e = m_prefs.edit();
 		e.putString(PREF_KEY_MAPPING_PROFILE, value);
@@ -138,6 +152,7 @@ public class Preferences {
 
 	public void clearKeyMappings(int controllerNo) {
 		clearByPrefix(getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-");
+		clearByPrefix(getCurrentProfile() + PREF_META_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-");
 	}
 	
 	private void clearByPrefix(String prefix) {

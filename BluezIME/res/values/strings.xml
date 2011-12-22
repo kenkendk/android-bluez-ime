@@ -96,6 +96,8 @@
 <string name="configuration_reset_short">Reset all to default</string>
 <string name="configuration_reset_long">Click here to return button mappings to their default</string>
 
+<string name="configuration_toggle_meta" formated="false">Toggle %s</string>
+    
 <string name="zeemote_button_a">Button A</string>
 <string name="zeemote_button_b">Button B</string>
 <string name="zeemote_button_c">Button C</string>

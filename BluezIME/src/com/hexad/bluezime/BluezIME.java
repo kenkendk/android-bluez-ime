@@ -46,7 +46,8 @@ public class BluezIME extends InputMethodService {
 	
 	private NotificationManager m_notificationManager;
 	private Notification m_notification;
-	private int[] m_keyMappingCache = null;
+	private int[][] m_keyMappingCache = null;
+	private int[][] m_metaKeyMappingCache = null;
 	
 	private PowerManager.WakeLock m_wakelock = null;
 	private int m_wakelocktype = 0;
@@ -58,9 +59,14 @@ public class BluezIME extends InputMethodService {
 		
 		m_notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		m_notification = new Notification(R.drawable.icon, getString(R.string.app_name), System.currentTimeMillis());
-		m_keyMappingCache = new int[Math.max(0x100, KeyEvent.getMaxKeyCode())];
-		for(int i = 0; i < m_keyMappingCache.length; i++)
-			m_keyMappingCache[i] = -1;
+		m_keyMappingCache = new int[Preferences.MAX_NO_OF_CONTROLLERS][Math.max(FutureKeyCodes.FUTURE_MAX_KEYCODE, KeyEvent.getMaxKeyCode()) + 1];
+		m_metaKeyMappingCache = new int[Preferences.MAX_NO_OF_CONTROLLERS][m_keyMappingCache.length];
+		for(int i = 0; i < m_keyMappingCache.length; i++) {
+			for(int j = 0; j < m_keyMappingCache[i].length; j++) {
+				m_keyMappingCache[i][j] = -1;
+				m_metaKeyMappingCache[i][j] = -1;
+			}
+		}
 				
 		setNotificationText(getString(R.string.ime_starting));
 		acquireWakeLock();
@@ -315,8 +321,12 @@ public class BluezIME extends InputMethodService {
 		public void onReceive(Context context, Intent intent) {
 
 			//Clear the key mapping cache
-			for(int i = 0; i < m_keyMappingCache.length; i++)
-				m_keyMappingCache[i] = -1;
+			for(int i = 0; i < m_keyMappingCache.length; i++) {
+				for(int j = 0; j < m_keyMappingCache[i].length; j++) {
+					m_keyMappingCache[i][j] = -1;
+					m_metaKeyMappingCache[i][j] = -1;
+				}
+			}
 			
 			if (getConnectedCount() > 0)
 				connect();
@@ -351,16 +361,22 @@ public class BluezIME extends InputMethodService {
 					//This construct ensures that we can perform lock free
 					// access to m_keyMappingCache and never risk sending -1 
 					// as the keyCode
-					if (key >= m_keyMappingCache.length) {
-						Log.e(LOG_NAME, "Key reported by driver: " + key + ", size of keymapping array: " + m_keyMappingCache.length);
+					if (controllerNo >= m_keyMappingCache.length || key >= m_keyMappingCache[controllerNo].length) {
+						Log.e(LOG_NAME, "Key reported by driver: " + key + ", size of keymapping array: " + m_keyMappingCache[0].length + ", controller no " + controllerNo + ", expected controllers: " + m_keyMappingCache.length);
 					} else {
-						int translatedKey = m_keyMappingCache[key];
+						int translatedKey = m_keyMappingCache[controllerNo][key];
 						if (translatedKey == -1) {
 							translatedKey = m_prefs.getKeyMapping(key, controllerNo);
-							m_keyMappingCache[key] = translatedKey;
+							m_keyMappingCache[controllerNo][key] = translatedKey;
 						} 
-						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key);
-						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, 0, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+						int metakey = m_metaKeyMappingCache[controllerNo][key];
+						if (metakey == -1) {
+							metakey = m_prefs.getMetaKeyMapping(key, controllerNo);
+							m_metaKeyMappingCache[controllerNo][key] = metakey;
+						}
+						
+						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key + " - " + metakey);
+						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, metakey, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
 					}
 				}
 			} catch (Exception ex) {
