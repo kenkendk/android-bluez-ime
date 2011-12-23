@@ -60,7 +60,7 @@ public class BluezIME extends InputMethodService {
 		m_notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
 		m_notification = new Notification(R.drawable.icon, getString(R.string.app_name), System.currentTimeMillis());
 		m_keyMappingCache = new int[Preferences.MAX_NO_OF_CONTROLLERS][Math.max(FutureKeyCodes.FUTURE_MAX_KEYCODE, KeyEvent.getMaxKeyCode()) + 1];
-		m_metaKeyMappingCache = new int[Preferences.MAX_NO_OF_CONTROLLERS][m_keyMappingCache.length];
+		m_metaKeyMappingCache = new int[Preferences.MAX_NO_OF_CONTROLLERS][m_keyMappingCache[0].length];
 		for(int i = 0; i < m_keyMappingCache.length; i++) {
 			for(int j = 0; j < m_keyMappingCache[i].length; j++) {
 				m_keyMappingCache[i][j] = -1;
