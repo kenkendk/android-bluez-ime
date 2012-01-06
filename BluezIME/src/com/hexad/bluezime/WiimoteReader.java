@@ -283,6 +283,75 @@ public class WiimoteReader extends HIDReaderBase {
 	private byte m_updateRequestLEDState = m_LEDstate;
 	private boolean m_updateRequestAccelerometer = m_useAccelerometer;
 	
+	private static class ClassicCalibrationDataAxis {
+		public int min;
+		public int max;
+		public int center;
+		
+		public void ResetAsLeft() {
+			//6 bits = 0 - 63
+			min = 0;
+			center = 31;
+			max = 63;
+			
+			//min = 5;
+			//center = 30;
+			//max = 55;
+		}
+
+		public void ResetAsRight() {
+			//5 bits = 0 - 31
+			min = 0;
+			center = 15;
+			max = 31;
+			
+			//min = 0;
+			//center = 15;
+			//max = 30;
+		}
+		
+		public int NormalizedValue(int raw) {
+			if (raw == center) {
+				return 0;
+			} else if (raw < center) {
+				return ((byte)(((raw - min) / (float)(center - min)) * 127)) - 127;
+			} else {
+				return (byte)(((raw - center) / (float)(max - center)) * 127);
+			}
+		}
+	}
+	
+	private static class ClassicCalibrationDataStick {
+		public final ClassicCalibrationDataAxis x = new ClassicCalibrationDataAxis();
+		public final ClassicCalibrationDataAxis y = new ClassicCalibrationDataAxis();
+		private final boolean m_isLeft;
+	
+		public ClassicCalibrationDataStick(boolean isLeft) {
+			m_isLeft = isLeft;
+			Reset();
+		}
+		
+		public void Reset() {
+			if (m_isLeft)
+				ResetAsLeft();
+			else
+				ResetAsRight();
+		}
+		
+		public void ResetAsLeft() {
+			x.ResetAsLeft();
+			y.ResetAsLeft();
+		}
+
+		public void ResetAsRight() {
+			x.ResetAsRight();
+			y.ResetAsRight();
+		}
+	}
+	
+	private final ClassicCalibrationDataStick m_classic_calibration_left = new ClassicCalibrationDataStick(true);
+	private final ClassicCalibrationDataStick m_classic_calibration_right = new ClassicCalibrationDataStick(false);
+	
 	//We keep a copy to prevent repeated allocations
 	private Hashtable<Byte, Integer> m_reportCodes = null;
 	
@@ -368,7 +437,7 @@ public class WiimoteReader extends HIDReaderBase {
 					if (D) Log.e(DRIVER_NAME, "Failed to read extension type");
 					m_extensionInitState = EXTENSION_INIT_STATE_NONE;
 				} else {
-					byte size = (byte)((data[2] >>> 4) + 1);
+					byte size = (byte)((byte)((data[2] & 0xff) >>> 4) + 1);
 					int dataoffset = (data[3] << 8) | (((int)data[4]) &0xff);
 					System.arraycopy(data, 5, m_memoryDataBuffer, 0, size);
 					handleExtensionDataRead(dataoffset, size, m_memoryDataBuffer);
@@ -424,7 +493,25 @@ public class WiimoteReader extends HIDReaderBase {
 
 	private void handleExtensionDataRead(int offset, byte size, byte[] data) throws IOException {
 		
-		if (offset != 0x00fa || size != CLASSIC_DEVICE_ID.length) {
+		//Special report, read calibration data from classic controller
+		if (offset == 0x0020) {
+			//TODO: The Nunchuck can also deliver calibration data
+			if ((data[0] & 0xff) != 0xff && data[0] != 0x00 && size >= 12 && m_isClassicConnected) {
+				m_classic_calibration_left.x.max = data[0] / 4;
+				m_classic_calibration_left.x.min = data[1] / 4;
+				m_classic_calibration_left.x.center = data[2] / 4;
+				m_classic_calibration_left.y.max = data[3] / 4;
+				m_classic_calibration_left.y.min = data[4] / 4;
+				m_classic_calibration_left.y.center = data[5] / 4;
+
+				m_classic_calibration_left.x.max = data[6] / 8;
+				m_classic_calibration_left.x.min = data[7] / 8;
+				m_classic_calibration_left.x.center = data[8] / 8;
+				m_classic_calibration_left.y.max = data[9] / 8;
+				m_classic_calibration_left.y.min = data[10] / 8;
+				m_classic_calibration_left.y.center = data[11] / 8;
+			}
+		} else	if (offset != 0x00fa || size != CLASSIC_DEVICE_ID.length) {
 			Log.e(DRIVER_NAME, "Unexpected data read: " + getHexString(data, 0, size));
 		} else if (m_extensionInitState != EXTENSION_INIT_STATE_SENT_READ) {
 			Log.e(DRIVER_NAME, "Got extension data but state was: " + m_extensionInitState);			
@@ -461,6 +548,12 @@ public class WiimoteReader extends HIDReaderBase {
 					m_classicEmulatedButtons[i] = false;
 				
 				m_isClassicConnected = true;
+				m_classic_calibration_left.Reset();
+				m_classic_calibration_right.Reset();
+				
+				//Ask for calibration data, if we do not get it, we just use the default data
+				readExtensionRegisters((byte)0x20, (byte)16);
+				
 				updateReportMode();
 			} else if (nunchuck | nunchuck_alt) {
 				if (D) Log.d(DRIVER_NAME, "Wii Nunchuck Controller Extension connected");
@@ -790,17 +883,14 @@ public class WiimoteReader extends HIDReaderBase {
 					+ m_tmpAnalogValues[3] + ", "
 					+ m_tmpAnalogValues[4] + ", "
 					+ m_tmpAnalogValues[5] + ", ");
-			
+
 			//We scale up the values so they are all in the -127/+127 range
-			
-			//The left analog stick has 6 bits precision
-			m_tmpAnalogValues[0] = (byte)(((m_tmpAnalogValues[0] << 2) - 127) & 0xff);
-			m_tmpAnalogValues[1] = (byte)(((m_tmpAnalogValues[1] << 2) - 127) & 0xff);
-	
-			//The right analog stick has 5 bits precison
-			m_tmpAnalogValues[2] = (byte)(((m_tmpAnalogValues[2] << 3) - 127) & 0xff);
-			m_tmpAnalogValues[3] = (byte)(((m_tmpAnalogValues[3] << 3) - 127) & 0xff);
-			
+			// if we have some calibration data, we also apply that
+			m_tmpAnalogValues[0] = m_classic_calibration_left.x.NormalizedValue(m_tmpAnalogValues[0]);
+			m_tmpAnalogValues[1] = m_classic_calibration_left.y.NormalizedValue(m_tmpAnalogValues[1]);
+			m_tmpAnalogValues[2] = m_classic_calibration_right.x.NormalizedValue(m_tmpAnalogValues[2]);
+			m_tmpAnalogValues[3] = m_classic_calibration_right.y.NormalizedValue(m_tmpAnalogValues[3]);
+						
 			//The L/R triggers have 5 bits, but only reports in 0-127,
 			// as you can only push it in one direction
 			m_tmpAnalogValues[4] = ((byte)(m_tmpAnalogValues[4] << 2));
