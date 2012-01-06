@@ -62,11 +62,14 @@ public class BluezIMESettings extends PreferenceActivity {
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
+	private final String[] DRIVER_NAMES = BluezService.getDriverNames();
+	private final String[] DRIVER_DISPLAYNAMES = BluezService.getDriverDisplayNames();
+	
 	private Preferences m_prefs;
 	
 	@SuppressWarnings("unused")
 	private Object m_donationObserver; 
-	
+		
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.bluezimesettings);
@@ -312,7 +315,7 @@ public class BluezIMESettings extends PreferenceActivity {
     		updateDisplay();
         }
 
-    	CharSequence[] entries = new CharSequence[BluezService.DRIVER_NAMES.length];
+    	CharSequence[] entries = new CharSequence[DRIVER_NAMES.length];
     	CharSequence[] entryValues = new CharSequence[entries.length];
     	String[] displayNames = this.getResources().getStringArray(R.array.driver_displaynames);
     	
@@ -320,9 +323,9 @@ public class BluezIMESettings extends PreferenceActivity {
     		if (displayNames.length > i)
     			entries[i] = displayNames[i];
     		else
-    			entries[i] = BluezService.DRIVER_DISPLAYNAMES[i];
+    			entries[i] = DRIVER_DISPLAYNAMES[i];
     		
-    		entryValues[i] = BluezService.DRIVER_NAMES[i];
+    		entryValues[i] = DRIVER_NAMES[i];
     	}
     	
     	for(ListPreference p : m_drivers) {
@@ -485,16 +488,16 @@ public class BluezIMESettings extends PreferenceActivity {
 			}
 			
 			int index = -1;
-			for(int j = 0; j < BluezService.DRIVER_NAMES.length; j++)
-				if (BluezService.DRIVER_NAMES[j].equals(driver)) {
+			for(int j = 0; j < DRIVER_NAMES.length; j++)
+				if (DRIVER_NAMES[j].equals(driver)) {
 					index = j;
 					break;
 				}
 	
-			if (index < 0 || index >= BluezService.DRIVER_DISPLAYNAMES.length)
+			if (index < 0 || index >= DRIVER_DISPLAYNAMES.length)
 				drv.setSummary(R.string.preference_device_unknown);
 			else
-				drv.setSummary(BluezService.DRIVER_DISPLAYNAMES[index]);
+				drv.setSummary(DRIVER_DISPLAYNAMES[index]);
 			
 			btn.setEnabled(m_prefs.getSelectedDriverName(i) != null && m_prefs.getSelectedDriverName(i).length() > 0);
 		}

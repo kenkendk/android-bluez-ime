@@ -17,6 +17,7 @@
 */
 package com.hexad.bluezime;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 
 import android.app.IntentService;
@@ -29,25 +30,30 @@ import android.util.Log;
 
 public class BluezService extends IntentService {
 	
-	public static final String[] DRIVER_NAMES = {
+	private static final String[] BASE_DRIVER_NAMES = {
 		ZeemoteReader.DRIVER_NAME, 
 		BGP100Reader.DRIVER_NAME, 
 		PhonejoyReader.DRIVER_NAME,
 		iControlPadReader.DRIVER_NAME,
-		WiimoteReader.DRIVER_NAME,
 		DataDumpReader.DRIVER_NAME
 	};
 	
-	public static final String[] DRIVER_DISPLAYNAMES = {
+	private static final String[] BASE_DRIVER_DISPLAYNAMES = {
 		ZeemoteReader.DISPLAY_NAME, 
 		BGP100Reader.DISPLAY_NAME, 
 		PhonejoyReader.DISPLAY_NAME,
 		iControlPadReader.DISPLAY_NAME,
-		WiimoteReader.DISPLAY_NAME,
 		DataDumpReader.DISPLAY_NAME
 	};
-	public static final String DEFAULT_DRIVER_NAME = DRIVER_NAMES[0];
 	
+	private static final String[] HID_DRIVER_NAMES = {
+		WiimoteReader.DRIVER_NAME
+	};
+
+	private static final String[] HID_DRIVER_DISPLAYNAMES = {
+		WiimoteReader.DISPLAY_NAME
+	};
+
 	public static final String SESSION_ID = "com.hexad.bluezime.sessionid";
 	public static final String DEFAULT_SESSION_NAME = "com.hexad.bluezime.default_session";
 	
@@ -105,7 +111,6 @@ public class BluezService extends IntentService {
 	public static final String EVENT_REPORT_CONFIG_VERSION = "version";
 	public static final String EVENT_REPORT_CONFIG_DRIVER_NAMES = "drivernames";
 	public static final String EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES = "driverdisplaynames";
-	
 	
 	private static final String LOG_NAME = "BluezService";
 	private final Binder binder = new LocalBinder();
@@ -230,8 +235,8 @@ public class BluezService extends IntentService {
 			
 			i.putExtra(SESSION_ID, sessionId);
 			i.putExtra(EVENT_REPORT_CONFIG_VERSION, version);
-			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_NAMES, BluezService.DRIVER_NAMES);
-			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES, BluezService.DRIVER_DISPLAYNAMES);
+			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_NAMES, getDriverNames());
+			i.putExtra(EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES, getDriverDisplayNames());
 			
 			sendBroadcast(i);
 		} else {
@@ -329,7 +334,34 @@ public class BluezService extends IntentService {
 			notifyError(ex, sessionId);
 		}
 	}
+	
+	public static String[] getDriverNames() {
+		ArrayList<String> drivers = new ArrayList<String>(); 
+		for(int i = 0; i < BASE_DRIVER_NAMES.length; i++)
+			drivers.add(BASE_DRIVER_NAMES[i]);
+		
+		if (hasHIDSupport())
+			for(int i = 0; i < HID_DRIVER_NAMES.length; i++)
+				drivers.add(HID_DRIVER_NAMES[i]);
+		
+		return drivers.toArray(new String[drivers.size()]); 
+	}
+	public static String[] getDriverDisplayNames() { 
+		ArrayList<String> drivers = new ArrayList<String>(); 
+		for(int i = 0; i < BASE_DRIVER_DISPLAYNAMES.length; i++)
+			drivers.add(BASE_DRIVER_DISPLAYNAMES[i]);
 
+		if (hasHIDSupport())
+			for(int i = 0; i < HID_DRIVER_DISPLAYNAMES.length; i++)
+				drivers.add(HID_DRIVER_DISPLAYNAMES[i]);
+
+		return drivers.toArray(new String[drivers.size()]); 
+	}
+	
+	public static String getDefaultDriverName() { return BASE_DRIVER_NAMES[0]; }
+
+	private static boolean hasHIDSupport() { return true; }
+	
 	private void notifyError(Exception ex, String sessionId) {
 		Log.e(LOG_NAME, ex.toString());
 
