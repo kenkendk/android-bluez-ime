@@ -31,7 +31,7 @@ public class WiimoteReader extends HIDReaderBase {
 	private static final boolean D3 = false; //Classic Controller debug info
 	
 	public static final String DRIVER_NAME = "wiimote";
-	public static final String DISPLAY_NAME = "Wiimote (some firmwares)";
+	public static final String DISPLAY_NAME = "Wiimote (HID)";
 
 	//These are from API level 9
 	public static final int KEYCODE_BUTTON_A = 0x60;
@@ -776,6 +776,7 @@ public class WiimoteReader extends HIDReaderBase {
 
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, states[i] == 1 ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, keys[i]);
+					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
 					m_context.sendBroadcast(keypressBroadcast);
 				}
@@ -814,6 +815,7 @@ public class WiimoteReader extends HIDReaderBase {
 					if (keys[i*2] != KEYCODE_UNUSED) {
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, up ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, keys[i*2]);
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
 						m_context.sendBroadcast(keypressBroadcast);
 					}
@@ -824,6 +826,7 @@ public class WiimoteReader extends HIDReaderBase {
 					if (keys[i*2 + 1] != KEYCODE_UNUSED) {
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, down ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, keys[(i*2) + 1]);
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
 						m_context.sendBroadcast(keypressBroadcast);
 					}
@@ -922,6 +925,7 @@ public class WiimoteReader extends HIDReaderBase {
 
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, isCPressed ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, NUNCHUCK_KEYS[0]);
+					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
 					m_context.sendBroadcast(keypressBroadcast);
 				}
@@ -934,6 +938,7 @@ public class WiimoteReader extends HIDReaderBase {
 
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, isZPressed ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, NUNCHUCK_KEYS[1]);
+					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 					keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
 					m_context.sendBroadcast(keypressBroadcast);
 				}

@@ -47,11 +47,13 @@ public class BluezService extends IntentService {
 	};
 	
 	private static final String[] HID_DRIVER_NAMES = {
-		WiimoteReader.DRIVER_NAME
+		WiimoteReader.DRIVER_NAME,
+		HIDKeyboard.DRIVER_NAME
 	};
 
 	private static final String[] HID_DRIVER_DISPLAYNAMES = {
-		WiimoteReader.DISPLAY_NAME
+		WiimoteReader.DISPLAY_NAME,
+		HIDKeyboard.DRIVER_DISPLAYNAME
 	};
 
 	public static final String SESSION_ID = "com.hexad.bluezime.sessionid";
@@ -60,6 +62,7 @@ public class BluezService extends IntentService {
 	public static final String EVENT_KEYPRESS = "com.hexad.bluezime.keypress";
 	public static final String EVENT_KEYPRESS_KEY = "key";
 	public static final String EVENT_KEYPRESS_ACTION = "action";
+	public static final String EVENT_KEYPRESS_MODIFIERS = "modifiers";
 	public static final String EVENT_KEYPRESS_ANALOG_EMULATED = "emulated";
 
 	public static final String EVENT_DIRECTIONALCHANGE = "com.hexad.bluezime.directionalchange";
@@ -323,6 +326,8 @@ public class BluezService extends IntentService {
 					reader = new iControlPadReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(WiimoteReader.DRIVER_NAME.toLowerCase()))
 					reader = new WiimoteReader(address, sessionId, getApplicationContext(), startnotification);
+				else if (driver.toLowerCase().equals(HIDKeyboard.DRIVER_NAME.toLowerCase()))
+					reader = new HIDKeyboard(address, sessionId, getApplicationContext(), startnotification);
 				else
 					throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 				

@@ -120,6 +120,7 @@ public class ZeemoteReader extends RfcommReader {
 					{
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, buttons[i] ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, (i < 6 ? KEYCODE_BUTTON_A : KeyEvent.KEYCODE_A) + i);
+						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
 						m_context.sendBroadcast(keypressBroadcast);
 						m_buttons[i] = buttons[i];

@@ -126,6 +126,7 @@ public class PhonejoyReader extends BGP100Reader {
 				
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, pressedUp ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, ANALOG_KEYS[(axis * 2)]);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
 				m_context.sendBroadcast(keypressBroadcast);
 			}
@@ -137,6 +138,7 @@ public class PhonejoyReader extends BGP100Reader {
 
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, pressedDown ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, ANALOG_KEYS[(axis * 2) + 1]);
+				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 				keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, true);
 				m_context.sendBroadcast(keypressBroadcast);
 			}

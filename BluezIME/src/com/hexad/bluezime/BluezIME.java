@@ -357,6 +357,7 @@ public class BluezIME extends InputMethodService {
 				if (intent.getAction().equals(BluezService.EVENT_KEYPRESS)) {
 					int action = intent.getIntExtra(BluezService.EVENT_KEYPRESS_ACTION, KeyEvent.ACTION_DOWN);
 					int key = intent.getIntExtra(BluezService.EVENT_KEYPRESS_KEY, 0);
+					int metakey = intent.getIntExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, 0);
 
 					//This construct ensures that we can perform lock free
 					// access to m_keyMappingCache and never risk sending -1 
@@ -368,11 +369,20 @@ public class BluezIME extends InputMethodService {
 						if (translatedKey == -1) {
 							translatedKey = m_prefs.getKeyMapping(key, controllerNo);
 							m_keyMappingCache[controllerNo][key] = translatedKey;
-						} 
-						int metakey = m_metaKeyMappingCache[controllerNo][key];
-						if (metakey == -1) {
-							metakey = m_prefs.getMetaKeyMapping(key, controllerNo);
-							m_metaKeyMappingCache[controllerNo][key] = metakey;
+						}
+						
+						//TODO: This conflicts slightly, because we have no way of knowing.
+						// if the mapping is deliberately without a meta key, or just default.
+						//So if we have a case where the controller sends a meta modifier, we
+						// do not apply the user chosen override.
+						//Currently this is not a problem, because only the keyboard HID sends the modifier,
+						// and the user cannot set the modifier anyway
+						if (metakey == 0) {
+							metakey = m_metaKeyMappingCache[controllerNo][key];
+							if (metakey == -1) {
+								metakey = m_prefs.getMetaKeyMapping(key, controllerNo);
+								m_metaKeyMappingCache[controllerNo][key] = metakey;
+							}
 						}
 						
 						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key + " - " + metakey);

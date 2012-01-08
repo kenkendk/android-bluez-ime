@@ -27,7 +27,7 @@ import android.util.Log;
 
 public abstract class HIDReaderBase extends RfcommReader {
 
-	private static final boolean D = false;
+	private static final boolean D = true;
 	private static final String LOG_NAME = "HID Reader - ";
 	
 	private static final int HIDP_CONTROL_CHANNEL = 0x11; 
@@ -120,7 +120,7 @@ public abstract class HIDReaderBase extends RfcommReader {
 			}
 			else
 			{
-				if (D) Log.w(getDriverName(), "Got an unsupported HID report: " + data[offset + 1] + ", length: " + (remaining - 2));
+				if (D) Log.w(getDriverName(), "Got an unsupported HID report: " + data[offset + 1] + ", length: " + (remaining - 2) + ", data: " + getHexString(data, offset, offset + (remaining)));
 			}
 		}
 		
