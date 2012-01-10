@@ -371,7 +371,7 @@ public class BluezIME extends InputMethodService {
 							m_keyMappingCache[controllerNo][key] = translatedKey;
 						}
 						
-						//TODO: This conflicts slightly, because we have no way of knowing.
+						//TODO: This conflicts slightly with keyboard, because we have no way of knowing.
 						// if the mapping is deliberately without a meta key, or just default.
 						//So if we have a case where the controller sends a meta modifier, we
 						// do not apply the user chosen override.
@@ -386,7 +386,7 @@ public class BluezIME extends InputMethodService {
 						}
 						
 						if (D) Log.d(LOG_NAME, "Sending key event: " + (action == KeyEvent.ACTION_DOWN ? "Down" : "Up") + " - " + key + " - " + metakey);
-						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, metakey, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD|KeyEvent.FLAG_KEEP_TOUCH_MODE));
+						ic.sendKeyEvent(new KeyEvent(eventTime, eventTime, action, translatedKey, 0, metakey, 0, 0, KeyEvent.FLAG_SOFT_KEYBOARD));
 					}
 				}
 			} catch (Exception ex) {
