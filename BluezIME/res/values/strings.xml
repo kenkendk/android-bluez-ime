@@ -212,5 +212,21 @@
 <string name="wiimote_nunchuck_c">Nunchuck Button C</string>
 <string name="wiimote_nunchuck_z">Nunchuck Button Z</string>
 
+<string name="icade_button_a">Top row, button 1 (red)</string>
+<string name="icade_button_b">Top row, button 2 (black)</string>
+<string name="icade_button_c">Top row, button 3 (black)</string>
+<string name="icade_button_d">Top row, button 4 (white)</string>
+
+<string name="icade_button_x">Bottom row, button 1 (red)</string>
+<string name="icade_button_y">Bottom row, button 2 (black)</string>
+<string name="icade_button_z">Bottom row, button 3 (black)</string>
+<string name="icade_button_w">Bottom row, button 4 (white)</string>
+    
+<string name="icade_stick_left">Stick left</string>
+<string name="icade_stick_right">Stick right</string>
+
+<string name="icade_stick_up">Stick up</string>
+<string name="icade_stick_down">Stick down</string>
+    
 
 </resources>
