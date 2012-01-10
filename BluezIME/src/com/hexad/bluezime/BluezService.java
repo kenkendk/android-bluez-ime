@@ -48,12 +48,14 @@ public class BluezService extends IntentService {
 	
 	private static final String[] HID_DRIVER_NAMES = {
 		WiimoteReader.DRIVER_NAME,
-		HIDKeyboard.DRIVER_NAME
+		HIDKeyboard.DRIVER_NAME,
+		iCadeReader.DRIVER_NAME
 	};
 
 	private static final String[] HID_DRIVER_DISPLAYNAMES = {
 		WiimoteReader.DISPLAY_NAME,
-		HIDKeyboard.DRIVER_DISPLAYNAME
+		HIDKeyboard.DRIVER_DISPLAYNAME,
+		iCadeReader.DRIVER_DISPLAYNAME
 	};
 
 	public static final String SESSION_ID = "com.hexad.bluezime.sessionid";
@@ -328,6 +330,8 @@ public class BluezService extends IntentService {
 					reader = new WiimoteReader(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(HIDKeyboard.DRIVER_NAME.toLowerCase()))
 					reader = new HIDKeyboard(address, sessionId, getApplicationContext(), startnotification);
+				else if (driver.toLowerCase().equals(iCadeReader.DRIVER_NAME.toLowerCase()))
+					reader = new iCadeReader(address, sessionId, getApplicationContext(), startnotification);
 				else
 					throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 				

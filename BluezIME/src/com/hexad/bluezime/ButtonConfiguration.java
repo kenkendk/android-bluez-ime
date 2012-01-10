@@ -134,6 +134,13 @@ public class ButtonConfiguration extends PreferenceActivity {
 		} else if (driver.equals(WiimoteReader.DRIVER_NAME)) {
 			buttonCodes = WiimoteReader.getButtonCodes();
 			buttonNames = WiimoteReader.getButtonNames();
+		} else if (driver.equals(HIDKeyboard.DRIVER_NAME)) {
+			//TODO: Figure out what the display should look like
+			buttonCodes = new int[0];
+			buttonNames = new int[0];
+		} else if (driver.equals(iCadeReader.DRIVER_NAME)) {
+			buttonCodes = iCadeReader.getButtonCodes();
+			buttonNames = iCadeReader.getButtonNames();
 		} else {
 			buttonCodes = new int[0];
 			buttonNames = new int[0];

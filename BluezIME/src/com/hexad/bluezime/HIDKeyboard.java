@@ -99,8 +99,6 @@ public class HIDKeyboard extends HIDReaderBase {
 	//Map of HID keycodes to Android key event codes
 	private static final int[] HID2KEYCODE = new int[256];
 
-	private static Hashtable<Integer, Integer> HID2EXTENDED = new Hashtable<Integer, Integer>();
-	
 	//We initialize them here because it is easier to read this way,
 	// downside is that we may map the same key twice
 	static {
@@ -215,6 +213,49 @@ public class HIDKeyboard extends HIDReaderBase {
 	public String getDriverName() {
 		return DRIVER_NAME;
 	}
+	
+	public static int ParseModifiers(int data) {
+		int modifiers = 0;
+		if ((data & HIDP_LEFTCTRL) != 0)
+			modifiers |= FutureKeyCodes.META_CTRL_LEFT_ON | FutureKeyCodes.META_CTRL_ON;
+		if ((data & HIDP_RIGHTCTRL) != 0)
+			modifiers |= FutureKeyCodes.META_CTRL_RIGHT_ON | FutureKeyCodes.META_CTRL_ON;
+		if ((data & HIDP_LEFTALT) != 0)
+			modifiers |= FutureKeyCodes.META_ALT_LEFT_ON | FutureKeyCodes.META_ALT_ON;
+		if ((data & HIDP_RIGHTALT) != 0)
+			modifiers |= FutureKeyCodes.META_ALT_RIGHT_ON | FutureKeyCodes.META_ALT_ON;
+		if ((data & HIDP_LEFTSHIFT) != 0)
+			modifiers |= FutureKeyCodes.META_SHIFT_LEFT_ON | FutureKeyCodes.META_SHIFT_ON;
+		if ((data & HIDP_RIGHTSHIFT) != 0)
+			modifiers |= FutureKeyCodes.META_SHIFT_RIGHT_ON | FutureKeyCodes.META_SHIFT_ON;
+		if ((data & HIDP_LEFTGUI) != 0)
+			modifiers |= FutureKeyCodes.META_META_LEFT_ON | FutureKeyCodes.META_META_ON;
+		if ((data & HIDP_RIGHTGUI) != 0)
+			modifiers |= FutureKeyCodes.META_META_RIGHT_ON | FutureKeyCodes.META_META_ON;
+		
+		return modifiers;
+	}
+	
+	public static void DumpReport1Data(String logname, byte[] data) {
+		String tmp = "";
+
+		if (data[0] != 0)
+			tmp += "[0x" + getHexString(data, 0, 1) + "] ";
+		
+		boolean any = false;
+		for(int i = 2; i < data.length; i++) {
+			if (data[i] != 0) {
+				if (!any)
+					any = true;
+				else
+					tmp += ",";
+				
+				tmp += "0x" + getHexString(data, i, i + 1);
+			}
+		}
+		
+		Log.i(LOG_NAME, tmp);
+	}
 
 	@Override
 	protected void handleHIDMessage(byte hidType, byte reportId, byte[] data) throws Exception {
@@ -225,46 +266,12 @@ public class HIDKeyboard extends HIDReaderBase {
 				if (D) Log.w(LOG_NAME, "Got keypress message, bytes: " + getHexString(data, 0, data.length));
 
 				if (SHOW_RAW) {
-					String tmp = "";
-
-					if (data[0] != 0)
-						tmp += "[0x" + getHexString(data, 0, 1) + "] ";
-					
-					boolean any = false;
-					for(int i = 2; i < data.length; i++) {
-						if (data[i] != 0) {
-							if (!any)
-								any = true;
-							else
-								tmp += ",";
-							
-							tmp += "0x" + getHexString(data, i, i + 1);
-						}
-					}
-					
-					Log.i(LOG_NAME, tmp);
+					DumpReport1Data(LOG_NAME, data);
 				}
 
 				int scanmodifiers = ((int)data[0]) & 0xff;
-				int modifiers = 0;
-								
-				if ((scanmodifiers & HIDP_LEFTCTRL) != 0)
-					modifiers |= FutureKeyCodes.META_CTRL_LEFT_ON | FutureKeyCodes.META_CTRL_ON;
-				if ((scanmodifiers & HIDP_RIGHTCTRL) != 0)
-					modifiers |= FutureKeyCodes.META_CTRL_RIGHT_ON | FutureKeyCodes.META_CTRL_ON;
-				if ((scanmodifiers & HIDP_LEFTALT) != 0)
-					modifiers |= FutureKeyCodes.META_ALT_LEFT_ON | FutureKeyCodes.META_ALT_ON;
-				if ((scanmodifiers & HIDP_RIGHTALT) != 0)
-					modifiers |= FutureKeyCodes.META_ALT_RIGHT_ON | FutureKeyCodes.META_ALT_ON;
-				if ((scanmodifiers & HIDP_LEFTSHIFT) != 0)
-					modifiers |= FutureKeyCodes.META_SHIFT_LEFT_ON | FutureKeyCodes.META_SHIFT_ON;
-				if ((scanmodifiers & HIDP_RIGHTSHIFT) != 0)
-					modifiers |= FutureKeyCodes.META_SHIFT_RIGHT_ON | FutureKeyCodes.META_SHIFT_ON;
-				if ((scanmodifiers & HIDP_LEFTGUI) != 0)
-					modifiers |= FutureKeyCodes.META_META_LEFT_ON | FutureKeyCodes.META_META_ON;
-				if ((scanmodifiers & HIDP_RIGHTGUI) != 0)
-					modifiers |= FutureKeyCodes.META_META_RIGHT_ON | FutureKeyCodes.META_META_ON;
-				
+				int modifiers = ParseModifiers(scanmodifiers);
+												
 				for(int i = 0; i < META_KEY_MASKS.length; i++) {
 					if ((m_lastModifiers & META_KEY_MASKS[i]) != (modifiers & META_KEY_MASKS[i])) {
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, (modifiers & META_KEY_MASKS[i]) == 0 ? KeyEvent.ACTION_UP : KeyEvent.ACTION_DOWN);
@@ -353,13 +360,15 @@ public class HIDKeyboard extends HIDReaderBase {
 					Log.i(LOG_NAME, scanvalue + "");
 				
 				for(int i = 0; i < EXT_REPORT_KEYS.length; i++) {
-					int mask = 1 << i;
-					if ((scanvalue & mask) != (m_lastExtendedKeys & mask)) {
-						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, (scanvalue & mask) == 0 ? KeyEvent.ACTION_UP : KeyEvent.ACTION_DOWN);
-						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, EXT_REPORT_KEYS[i]);
-						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, m_lastModifiers);
-						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
-						m_context.sendBroadcast(keypressBroadcast);
+					if (EXT_REPORT_KEYS[i] != 0) {
+						int mask = 1 << i;
+						if ((scanvalue & mask) != (m_lastExtendedKeys & mask)) {
+							keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, (scanvalue & mask) == 0 ? KeyEvent.ACTION_UP : KeyEvent.ACTION_DOWN);
+							keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, EXT_REPORT_KEYS[i]);
+							keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, m_lastModifiers);
+							keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ANALOG_EMULATED, false);
+							m_context.sendBroadcast(keypressBroadcast);
+						}
 					}
 				}
 				
