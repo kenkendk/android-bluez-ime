@@ -8,7 +8,7 @@ import android.view.KeyEvent;
 
 public class HIDKeyboard extends HIDReaderBase {
 
-	private static final boolean D = false;
+	private static final boolean D = true;
 	private static final boolean SHOW_RAW = true;
 	
 	public static final String DRIVER_NAME = "hidkeyboard";
@@ -102,6 +102,10 @@ public class HIDKeyboard extends HIDReaderBase {
 	//We initialize them here because it is easier to read this way,
 	// downside is that we may map the same key twice
 	static {
+		
+		//TODO: Rewrite using the HUT section 10:
+		http://www.usb.org/developers/devclass_docs/Hut1_11.pdf
+		
 		HID2KEYCODE[0x1e] = FutureKeyCodes.KEYCODE_1;
 		HID2KEYCODE[0x1f] = FutureKeyCodes.KEYCODE_2;
 		HID2KEYCODE[0x20] = FutureKeyCodes.KEYCODE_3;
@@ -184,10 +188,6 @@ public class HIDKeyboard extends HIDReaderBase {
 		HID2KEYCODE[0x43] = FutureKeyCodes.KEYCODE_F10;
 		HID2KEYCODE[0x44] = FutureKeyCodes.KEYCODE_F11;
 		HID2KEYCODE[0x45] = FutureKeyCodes.KEYCODE_F12;
-
-		//Don't know what to map these as?
-		//HID2KEYCODE[0x3a] = FutureKeyCodes.KEYCODE_BRIGHTNESS_UP;
-		//HID2KEYCODE[0x3b] = FutureKeyCodes.KEYCODE_BRIGHTNESS_DOWN;
 	}
 	
 	//We keep a copy to prevent repeated allocations
@@ -271,7 +271,9 @@ public class HIDKeyboard extends HIDReaderBase {
 
 				int scanmodifiers = ((int)data[0]) & 0xff;
 				int modifiers = ParseModifiers(scanmodifiers);
-												
+				
+				//Figure out if any meta keys (CTRL, SHIFT, etc) have changed state,
+				// and send an appropriate key event
 				for(int i = 0; i < META_KEY_MASKS.length; i++) {
 					if ((m_lastModifiers & META_KEY_MASKS[i]) != (modifiers & META_KEY_MASKS[i])) {
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, (modifiers & META_KEY_MASKS[i]) == 0 ? KeyEvent.ACTION_UP : KeyEvent.ACTION_DOWN);
@@ -283,6 +285,8 @@ public class HIDKeyboard extends HIDReaderBase {
 					}
 				}
 				
+				//Re-allocate if we suddenly get more data than expected.
+				//This is done to prevent repeated allocations
 				if (m_pressed.length < data.length - 2) {
 					int[] tmp = new int[data.length -2];
 					System.arraycopy(m_pressed, 0, tmp, 0, m_pressed.length);
@@ -319,7 +323,6 @@ public class HIDKeyboard extends HIDReaderBase {
 					
 					//The key was not pressed before, send keydown event
 					if (pressed == -1) {
-						
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, KeyEvent.ACTION_DOWN);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_KEY, keycode);
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_MODIFIERS, modifiers);
@@ -339,9 +342,11 @@ public class HIDKeyboard extends HIDReaderBase {
 					}
 				}
 
+				//Make the current last, and save the current 
+				// as a buffer for the next event set
 				int[] tmp = m_lastPressed;
 				m_lastPressed = m_pressed;
-				m_pressed = m_lastPressed;
+				m_pressed = tmp;
 				m_lastPressedCount = pressedcount;
 				m_lastModifiers = modifiers;
 			}

@@ -26,7 +26,7 @@ import android.view.KeyEvent;
 
 public class WiimoteReader extends HIDReaderBase {
 
-	private static final boolean D = false; //General debug info
+	private static final boolean D = true; //General debug info
 	private static final boolean D2 = false; //Detailed (packages) debug info
 	private static final boolean D3 = false; //Classic Controller debug info
 	
@@ -495,8 +495,13 @@ public class WiimoteReader extends HIDReaderBase {
 		
 		//Special report, read calibration data from classic controller
 		if (offset == 0x0020) {
+			
+			if (D || D3) Log.i(DRIVER_NAME, "Got classic controller calibration report: " + getHexString(data, 0, data.length));
+
 			//TODO: The Nunchuck can also deliver calibration data
 			if ((data[0] & 0xff) != 0xff && data[0] != 0x00 && size >= 12 && m_isClassicConnected) {
+				if (D || D3) Log.i(DRIVER_NAME, "Classic controller calibration data seems valid, setting up ranges");
+
 				m_classic_calibration_left.x.max = data[0] / 4;
 				m_classic_calibration_left.x.min = data[1] / 4;
 				m_classic_calibration_left.x.center = data[2] / 4;
@@ -510,6 +515,8 @@ public class WiimoteReader extends HIDReaderBase {
 				m_classic_calibration_left.y.max = data[9] / 8;
 				m_classic_calibration_left.y.min = data[10] / 8;
 				m_classic_calibration_left.y.center = data[11] / 8;
+			} else {
+				if (D || D3) Log.i(DRIVER_NAME, "Classic Controller calibration data was not valid ignoring");
 			}
 		} else	if (offset != 0x00fa || size != CLASSIC_DEVICE_ID.length) {
 			Log.e(DRIVER_NAME, "Unexpected data read: " + getHexString(data, 0, size));
@@ -552,6 +559,7 @@ public class WiimoteReader extends HIDReaderBase {
 				m_classic_calibration_right.Reset();
 				
 				//Ask for calibration data, if we do not get it, we just use the default data
+				if (D || D3) Log.i(DRIVER_NAME, "Sending Classic Controller Calibration data request");
 				readExtensionRegisters((byte)0x20, (byte)16);
 				
 				updateReportMode();

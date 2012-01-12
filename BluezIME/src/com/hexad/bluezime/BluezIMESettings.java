@@ -33,6 +33,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.CheckBoxPreference;
 import android.preference.ListPreference;
@@ -62,8 +63,8 @@ public class BluezIMESettings extends PreferenceActivity {
 	
 	private HashMap<String, String> m_pairedDeviceLookup;
 	
-	private final String[] DRIVER_NAMES = BluezService.getDriverNames();
-	private final String[] DRIVER_DISPLAYNAMES = BluezService.getDriverDisplayNames();
+	private String[] DRIVER_NAMES; 
+	private String[] DRIVER_DISPLAYNAMES;;
 	
 	private Preferences m_prefs;
 	
@@ -73,7 +74,7 @@ public class BluezIMESettings extends PreferenceActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         addPreferencesFromResource(R.xml.bluezimesettings);
-
+        
         m_prefs = new Preferences(this);
         
         m_bluetoothActivity = (CheckBoxPreference)findPreference("blue_activated");
@@ -315,25 +316,16 @@ public class BluezIMESettings extends PreferenceActivity {
     		updateDisplay();
         }
 
-    	CharSequence[] entries = new CharSequence[DRIVER_NAMES.length];
-    	CharSequence[] entryValues = new CharSequence[entries.length];
-    	String[] displayNames = this.getResources().getStringArray(R.array.driver_displaynames);
-    	
-    	for(int i = 0; i < entries.length; i++) {
-    		if (displayNames.length > i)
-    			entries[i] = displayNames[i];
-    		else
-    			entries[i] = DRIVER_DISPLAYNAMES[i];
-    		
-    		entryValues[i] = DRIVER_NAMES[i];
-    	}
-    	
+        //Disable the driver selection until we know what drivers exist
     	for(ListPreference p : m_drivers) {
-    		p.setEntries(entries);
-    		p.setEntryValues(entryValues);
+    		p.setEnabled(false);
     	}
-
+		
     	registerReceiver(preferenceUpdateMonitor, new IntentFilter(Preferences.PREFERENCES_UPDATED));
+
+    	//Get the driver config from the server
+    	registerReceiver(configRequestMonitor, new IntentFilter(BluezService.EVENT_REPORT_CONFIG));
+    	this.startService(new Intent(BluezService.REQUEST_CONFIG));
     	
     	m_selectIME.setOnPreferenceClickListener(new OnPreferenceClickListener() {
 			@Override
@@ -352,6 +344,7 @@ public class BluezIMESettings extends PreferenceActivity {
     	if (bluetoothStateMonitor != null)
     		unregisterReceiver(bluetoothStateMonitor);
     	unregisterReceiver(preferenceUpdateMonitor);
+    	unregisterReceiver(configRequestMonitor);
     }
     
     
@@ -487,17 +480,19 @@ public class BluezIMESettings extends PreferenceActivity {
 					}
 			}
 			
-			int index = -1;
-			for(int j = 0; j < DRIVER_NAMES.length; j++)
-				if (DRIVER_NAMES[j].equals(driver)) {
-					index = j;
-					break;
-				}
-	
-			if (index < 0 || index >= DRIVER_DISPLAYNAMES.length)
-				drv.setSummary(R.string.preference_device_unknown);
-			else
-				drv.setSummary(DRIVER_DISPLAYNAMES[index]);
+			if (DRIVER_NAMES != null) {
+				int index = -1;
+				for(int j = 0; j < DRIVER_NAMES.length; j++)
+					if (DRIVER_NAMES[j].equals(driver)) {
+						index = j;
+						break;
+					}
+		
+				if (index < 0 || index >= DRIVER_DISPLAYNAMES.length)
+					drv.setSummary(R.string.preference_device_unknown);
+				else
+					drv.setSummary(DRIVER_DISPLAYNAMES[index]);
+			}
 			
 			btn.setEnabled(m_prefs.getSelectedDriverName(i) != null && m_prefs.getSelectedDriverName(i).length() > 0);
 		}
@@ -547,6 +542,38 @@ public class BluezIMESettings extends PreferenceActivity {
 			}
 		}
 	};
+	
+   	private BroadcastReceiver configRequestMonitor = new BroadcastReceiver() {
+			@Override
+			public void onReceive(Context context, Intent intent) {
+				if (DRIVER_NAMES == null) {
+					
+					DRIVER_NAMES = intent.getStringArrayExtra(BluezService.EVENT_REPORT_CONFIG_DRIVER_NAMES);
+					DRIVER_DISPLAYNAMES = intent.getStringArrayExtra(BluezService.EVENT_REPORT_CONFIG_DRIVER_DISPLAYNAMES);
+					
+			    	CharSequence[] entries = new CharSequence[DRIVER_NAMES.length];
+			    	CharSequence[] entryValues = new CharSequence[entries.length];
+			    	String[] displayNames = BluezIMESettings.this.getResources().getStringArray(R.array.driver_displaynames);
+			    	
+			    	for(int i = 0; i < entries.length; i++) {
+			    		if (displayNames.length > i)
+			    			entries[i] = displayNames[i];
+			    		else
+			    			entries[i] = DRIVER_DISPLAYNAMES[i];
+			    		
+			    		entryValues[i] = DRIVER_NAMES[i];
+			    	}
+			    	
+			    	for(ListPreference p : m_drivers) {
+			    		p.setEntries(entries);
+			    		p.setEntryValues(entryValues);
+			    		p.setEnabled(true);
+			    	}
+			    	
+			    	BluezIMESettings.this.updateDisplay();
+				}
+			}
+		};	
 	
 	private BroadcastReceiver preferenceUpdateMonitor = new BroadcastReceiver() {
 		@Override

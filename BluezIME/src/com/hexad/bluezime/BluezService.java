@@ -20,9 +20,12 @@ package com.hexad.bluezime;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
+import android.app.Application;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Binder;
 import android.os.IBinder;
@@ -123,6 +126,9 @@ public class BluezService extends IntentService {
 	//private static BluezDriverInterface m_reader = null;
 	private static Hashtable<String, BluezDriverInterface> m_readers = new Hashtable<String, BluezDriverInterface>();
 
+	private static boolean hasProbedForHID = false;
+	private static boolean supportsHID = false;
+	
 	public BluezService() {
 		super(LOG_NAME);
 	}
@@ -344,7 +350,7 @@ public class BluezService extends IntentService {
 		}
 	}
 	
-	public static String[] getDriverNames() {
+	public String[] getDriverNames() {
 		ArrayList<String> drivers = new ArrayList<String>(); 
 		for(int i = 0; i < BASE_DRIVER_NAMES.length; i++)
 			drivers.add(BASE_DRIVER_NAMES[i]);
@@ -355,7 +361,7 @@ public class BluezService extends IntentService {
 		
 		return drivers.toArray(new String[drivers.size()]); 
 	}
-	public static String[] getDriverDisplayNames() { 
+	public String[] getDriverDisplayNames() { 
 		ArrayList<String> drivers = new ArrayList<String>(); 
 		for(int i = 0; i < BASE_DRIVER_DISPLAYNAMES.length; i++)
 			drivers.add(BASE_DRIVER_DISPLAYNAMES[i]);
@@ -369,7 +375,22 @@ public class BluezService extends IntentService {
 	
 	public static String getDefaultDriverName() { return BASE_DRIVER_NAMES[0]; }
 
-	private static boolean hasHIDSupport() { return true; }
+	private boolean hasHIDSupport() {
+		if (!hasProbedForHID) {
+			hasProbedForHID = true;
+			supportsHID = false;
+			try {			
+				PackageInfo pi = this.getPackageManager().getPackageInfo("com.hexad.bluezime.hidenabler", PackageManager.GET_GIDS);
+				supportsHID = pi != null;
+			} catch (NameNotFoundException e) {
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		return supportsHID; 
+	}
 	
 	private void notifyError(Exception ex, String sessionId) {
 		Log.e(LOG_NAME, ex.toString());
