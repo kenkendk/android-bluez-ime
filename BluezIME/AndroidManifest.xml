@@ -2,6 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
       package="com.hexad.bluezime"
       android:versionCode="15" android:versionName="1.14">
+      
+    <uses-sdk android:minSdkVersion="8" />
+    
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+	<uses-permission android:name="com.android.vending.BILLING" />
+	<uses-permission android:name="android.permission.WAKE_LOCK"/>
+	<uses-permission android:name="android.permission.INJECT_EVENTS"/>
+    
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:debuggable="false">
 
    	<service android:name="BluezService" android:exported="true" android:enabled="true" >
@@ -53,12 +62,5 @@
     <!-- END: Support for in-app donation -->
     
 	</application>
-	
-    <uses-sdk android:minSdkVersion="8" />
-
-    <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
-	<uses-permission android:name="com.android.vending.BILLING" />
-	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 
 </manifest> 
