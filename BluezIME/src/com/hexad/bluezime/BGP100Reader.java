@@ -191,7 +191,7 @@ public class BGP100Reader extends RfcommReader {
 			}
 		}
 		
-		if (D2 && remaining > 0) Log.i(getDriverName(), "Reports remaining: " + remaining);
+		if (D2 && remaining > 0) Log.d(getDriverName(), "Reports remaining: " + remaining);
 		
 		return remaining;
 	}

@@ -87,13 +87,13 @@ public class DataDumpReader extends RfcommReader {
 
 	@Override
 	protected int parseInputData(byte[] data, int read) {
-		Log.i(LOG_NAME, "Read data: " + getHexString(data, 0, read));
+		Log.d(LOG_NAME, "Read data: " + getHexString(data, 0, read));
 		return 0;
 	}
 
 	@Override
 	protected void validateWelcomeMessage(byte[] data, int read) {
-		Log.i(LOG_NAME, "Welcome message is: " + getHexString(data, 0, read));
+		Log.d(LOG_NAME, "Welcome message is: " + getHexString(data, 0, read));
 	}
 
 }

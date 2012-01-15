@@ -475,7 +475,7 @@ public class WiimoteReader extends HIDReaderBase {
 
 		//If we have not yet seen an extension, lets force activation
 		if (m_probeExtension == EXTENSION_PROBETHRESHOLD && !(m_isClassicConnected || m_isNunchuckConnected)) {
-			if (D) Log.i(DRIVER_NAME, "Probing for extensions");
+			if (D) Log.d(DRIVER_NAME, "Probing for extensions");
 			//These will activate the extension without encryption
 			writeExtensionRegister((byte)0xf0, (byte)0x55);
 			m_extensionInitState = EXTENSION_INIT_STATE_SENT_FIRST;
@@ -496,11 +496,11 @@ public class WiimoteReader extends HIDReaderBase {
 		//Special report, read calibration data from classic controller
 		if (offset == 0x0020) {
 			
-			if (D || D3) Log.i(DRIVER_NAME, "Got classic controller calibration report: " + getHexString(data, 0, data.length));
+			if (D || D3) Log.d(DRIVER_NAME, "Got classic controller calibration report: " + getHexString(data, 0, data.length));
 
 			//TODO: The Nunchuck can also deliver calibration data
 			if ((data[0] & 0xff) != 0xff && data[0] != 0x00 && size >= 12 && m_isClassicConnected) {
-				if (D || D3) Log.i(DRIVER_NAME, "Classic controller calibration data seems valid, setting up ranges");
+				if (D || D3) Log.d(DRIVER_NAME, "Classic controller calibration data seems valid, setting up ranges");
 
 				m_classic_calibration_left.x.max = data[0] / 4;
 				m_classic_calibration_left.x.min = data[1] / 4;
@@ -516,7 +516,7 @@ public class WiimoteReader extends HIDReaderBase {
 				m_classic_calibration_left.y.min = data[10] / 8;
 				m_classic_calibration_left.y.center = data[11] / 8;
 			} else {
-				if (D || D3) Log.i(DRIVER_NAME, "Classic Controller calibration data was not valid ignoring");
+				if (D || D3) Log.d(DRIVER_NAME, "Classic Controller calibration data was not valid ignoring");
 			}
 		} else	if (offset != 0x00fa || size != CLASSIC_DEVICE_ID.length) {
 			Log.e(DRIVER_NAME, "Unexpected data read: " + getHexString(data, 0, size));
@@ -559,7 +559,7 @@ public class WiimoteReader extends HIDReaderBase {
 				m_classic_calibration_right.Reset();
 				
 				//Ask for calibration data, if we do not get it, we just use the default data
-				if (D || D3) Log.i(DRIVER_NAME, "Sending Classic Controller Calibration data request");
+				if (D || D3) Log.d(DRIVER_NAME, "Sending Classic Controller Calibration data request");
 				readExtensionRegisters((byte)0x20, (byte)16);
 				
 				updateReportMode();

@@ -254,7 +254,7 @@ public class HIDKeyboard extends HIDReaderBase {
 			}
 		}
 		
-		Log.i(LOG_NAME, tmp);
+		Log.d(LOG_NAME, tmp);
 	}
 
 	@Override
@@ -362,7 +362,7 @@ public class HIDKeyboard extends HIDReaderBase {
 						;
 				
 				if (SHOW_RAW)
-					Log.i(LOG_NAME, scanvalue + "");
+					Log.d(LOG_NAME, scanvalue + "");
 				
 				for(int i = 0; i < EXT_REPORT_KEYS.length; i++) {
 					if (EXT_REPORT_KEYS[i] != 0) {

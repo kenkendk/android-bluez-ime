@@ -194,7 +194,7 @@ public class iControlPadReader extends RfcommReader {
 	protected void validateWelcomeMessage(byte[] data, int read) {
 		String version = new String(data, 0, read);
 		
-		if (D) Log.i(getDriverName(), "Connected to version: " + version);
+		if (D) Log.d(getDriverName(), "Connected to version: " + version);
 	}
 	
 	@Override
