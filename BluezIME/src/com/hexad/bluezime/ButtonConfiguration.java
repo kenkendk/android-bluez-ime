@@ -20,7 +20,6 @@ package com.hexad.bluezime;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Hashtable;
-import java.util.Set;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;

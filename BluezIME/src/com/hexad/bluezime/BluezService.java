@@ -20,7 +20,6 @@ package com.hexad.bluezime;
 import java.util.ArrayList;
 import java.util.Hashtable;
 
-import android.app.Application;
 import android.app.IntentService;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
