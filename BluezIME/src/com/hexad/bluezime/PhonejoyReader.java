@@ -161,7 +161,7 @@ public class PhonejoyReader extends BGP100Reader {
 	public static int[] getButtonNames() {
 		return new int[] { 
 				R.string.bgp100_dpad_left, R.string.bgp100_dpad_right, R.string.bgp100_dpad_up, R.string.bgp100_dpad_down, 
-				R.string.bgp100_button_a, R.string.bgp100_button_b, R.string.bgp100_button_c, R.string.bgp100_button_d, 
+				R.string.phonejoy_button_1, R.string.phonejoy_button_2, R.string.phonejoy_button_4, R.string.phonejoy_button_3, 
 				R.string.phonejoy_button_l1, R.string.phonejoy_button_r1, R.string.phonejoy_button_l2, R.string.phonejoy_button_r2, 
 				R.string.bgp100_button_start, R.string.phonejoy_button_select,
 				R.string.phonejoy_analog_left_up, R.string.phonejoy_analog_left_down, R.string.phonejoy_analog_left_left, R.string.phonejoy_analog_left_right,

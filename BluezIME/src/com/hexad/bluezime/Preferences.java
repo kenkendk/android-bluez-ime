@@ -103,7 +103,31 @@ public class Preferences {
 	}
 	
 	public int getKeyMapping(int key, int controllerNo) {
-		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(key); 
+		String mapping = getCurrentProfile() + PREF_KEY_MAPPING + getSelectedDriverName(controllerNo) + (controllerNo == 0 ? "" : "#" + controllerNo) + "-" + Integer.toHexString(key);
+		
+		//Special default mapping for PhoneJoy pr. request
+		if (getSelectedDriverName(controllerNo).equals(PhonejoyReader.DRIVER_NAME)) {
+			switch(key) {
+				case FutureKeyCodes.KEYCODE_BUTTON_A: key = FutureKeyCodes.KEYCODE_BUTTON_Y; break;
+				case FutureKeyCodes.KEYCODE_BUTTON_B: key = FutureKeyCodes.KEYCODE_BUTTON_Z; break;
+				case FutureKeyCodes.KEYCODE_BUTTON_C: key = FutureKeyCodes.KEYCODE_BUTTON_X; break;
+				case FutureKeyCodes.KEYCODE_BUTTON_X: key = FutureKeyCodes.KEYCODE_DPAD_CENTER; break;
+				
+				case FutureKeyCodes.KEYCODE_BUTTON_L2: key = FutureKeyCodes.KEYCODE_BACK; break;
+				case FutureKeyCodes.KEYCODE_BUTTON_R2: key = FutureKeyCodes.KEYCODE_MENU; break;
+
+				case FutureKeyCodes.KEYCODE_T: key = FutureKeyCodes.KEYCODE_DPAD_UP; break;
+				case FutureKeyCodes.KEYCODE_G: key = FutureKeyCodes.KEYCODE_DPAD_DOWN; break;
+				case FutureKeyCodes.KEYCODE_F: key = FutureKeyCodes.KEYCODE_DPAD_LEFT; break;
+				case FutureKeyCodes.KEYCODE_H: key = FutureKeyCodes.KEYCODE_DPAD_RIGHT; break;
+
+				case FutureKeyCodes.KEYCODE_I: key = FutureKeyCodes.KEYCODE_W; break;
+				case FutureKeyCodes.KEYCODE_K: key = FutureKeyCodes.KEYCODE_S; break;
+				case FutureKeyCodes.KEYCODE_J: key = FutureKeyCodes.KEYCODE_A; break;
+				case FutureKeyCodes.KEYCODE_L: key = FutureKeyCodes.KEYCODE_D; break;
+			}
+		}
+		
 		return m_prefs.getInt(mapping, key);
 	}
 	
