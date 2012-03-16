@@ -8,8 +8,8 @@ import android.view.KeyEvent;
 
 public class HIDKeyboard extends HIDReaderBase {
 
-	private static final boolean D = true;
-	private static final boolean SHOW_RAW = true;
+	private static final boolean D = false;
+	private static final boolean SHOW_RAW = false;
 	
 	public static final String DRIVER_NAME = "hidkeyboard";
 	public static final String DRIVER_DISPLAYNAME = "Keyboard (HID)";

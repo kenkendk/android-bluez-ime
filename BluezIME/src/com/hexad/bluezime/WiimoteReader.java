@@ -26,7 +26,7 @@ import android.view.KeyEvent;
 
 public class WiimoteReader extends HIDReaderBase {
 
-	private static final boolean D = true; //General debug info
+	private static final boolean D = false; //General debug info
 	private static final boolean D2 = false; //Detailed (packages) debug info
 	private static final boolean D3 = false; //Classic Controller debug info
 	
