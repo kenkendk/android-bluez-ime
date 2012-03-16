@@ -104,7 +104,7 @@ public class HIDKeyboard extends HIDReaderBase {
 	static {
 		
 		//TODO: Rewrite using the HUT section 10:
-		http://www.usb.org/developers/devclass_docs/Hut1_11.pdf
+		//http://www.usb.org/developers/devclass_docs/Hut1_11.pdf
 		
 		HID2KEYCODE[0x1e] = FutureKeyCodes.KEYCODE_1;
 		HID2KEYCODE[0x1f] = FutureKeyCodes.KEYCODE_2;
