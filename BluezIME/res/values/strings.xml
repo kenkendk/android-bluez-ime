@@ -141,6 +141,11 @@
 <string name="phonejoy_analog_right_left">Right analog, Left</string>
 <string name="phonejoy_analog_right_right">Right analog, Right</string>
 
+<string name="phonejoy_button_1">Button 1</string>
+<string name="phonejoy_button_2">Button 2</string>
+<string name="phonejoy_button_3">Button 3</string>
+<string name="phonejoy_button_4">Button 4</string>
+
 
 <string name="icp_button_left">Dpad Left</string>
 <string name="icp_button_right">Dpad Right</string>
