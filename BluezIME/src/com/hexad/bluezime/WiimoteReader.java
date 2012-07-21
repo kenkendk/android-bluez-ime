@@ -399,6 +399,10 @@ public class WiimoteReader extends HIDReaderBase {
 		//When this is called, we are connected, 
 		// so we set up the current state
 		
+		//Bugfix, there seems to be some cases where the controller does not respond immediately
+		try { Thread.sleep(500); }
+		catch (InterruptedException iex) {}
+		
 		//Set the LEDs to indicate we are now connected
 		setLEDs(true, false, false, false);
 		
