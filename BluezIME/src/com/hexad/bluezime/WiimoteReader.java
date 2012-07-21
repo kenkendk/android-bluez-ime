@@ -386,6 +386,8 @@ public class WiimoteReader extends HIDReaderBase {
 	public WiimoteReader(String address, String sessionId, Context context, boolean startnotification) throws Exception {
 		super(address, sessionId, context, startnotification);
 
+		super.m_useInsecureChannel = true;
+		
 		super.doConnect();
 	}
 
