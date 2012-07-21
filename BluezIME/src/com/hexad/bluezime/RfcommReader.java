@@ -83,7 +83,8 @@ public abstract class RfcommReader implements BluezDriverInterface {
 			if (!blue.isEnabled())
 				throw new Exception(m_context.getString(R.string.error_bluetooth_off));
 			
-			blue.cancelDiscovery();
+			try { blue.cancelDiscovery(); }
+			catch (Exception e) { }
 			
 			m_device = new ImprovedBluetoothDevice(blue.getRemoteDevice(address));
 	        m_name = m_device.getName();
