@@ -1,0 +1,233 @@
+ <resources>
+     
+ <string name="app_name">Bluez IME</string>
+<string name="error_message_generic" formatted="false">错误: %s</string>
+<string name="connected_to_device_message" formatted="false">连接到 %s</string>
+<string name="disconnected_from_device_message" formatted="false">连接被中断 %s</string>
+<string name="bluetooth_state_on">蓝牙已经开启</string>
+<string name="bluetooth_state_off">蓝牙已经关闭</string>
+<string name="bluetooth_state_turning_on">蓝牙打开中 ...</string>
+<string name="bluetooth_state_turning_off">蓝牙关闭中 ...</string>
+<string name="bluetooth_unsupported">抱歉，这个设备的蓝牙不支持本应用</string>
+<string name="bluetooth_disable_question">这将会导致蓝牙关闭,\n并且导致所有已连接的蓝牙设备断开连接.\n\n请问你真的要这么做么?</string>
+<string name="bluetooth_disable_dialog_title">关闭蓝牙</string>
+ 
+<string name="bluetooth_enable_question">开启蓝牙?</string>
+<string name="bluetooth_enable_dialog_title">开启蓝牙</string>
+ 
+<string name="notification_text">活动的</string>
+<string name="enabling_bluetooth">蓝牙已经开启...</string>
+<string name="disabling_bluetooth">蓝牙已经关闭...</string>
+ 
+<string name="yes">是的</string>
+<string name="no">不</string>
+ 
+ 
+<string name="bluetooth_scan_menu">搜索 ...</string>
+<string name="bluetooth_no_device">没有搜索到设备</string>
+<string name="invalid_driver" formatted="false">抱歉，这个设备是无效的: %s</string>
+ 
+ <string-array name="driver_displaynames">
+   <item>Zeemote JS1</item>
+ </string-array>
+<string name="devicelist_scanfordevices">搜索设备</string>
+<string name="devicelist_scanningfordevices">搜索设备中 ...</string>
+<string name="devicelist_paireddevices">配对设备</string>
+<string name="devicelist_founddevices">找到的设备</string>
+<string name="devicelist_pairingwithdevice" formated="false">已经配对的设备: %s</string>
+ 
+ 
+<string name="preferencelist_header1">1. 设置控制器 </string>
+<string name="preferencelist_header2">2. 设置输入法</string>
+<string name="preferencelist_header3">3. 更多</string>
+<string name="preferencelist_activateitem">激活蓝牙</string>
+<string name="preferencelist_selectimehint">请点击这里选择"Bluez IME"输入法\n\n如果 "Bluez IME" 没有被开启, 请到 设置 -> 语言和输入法 中开启</string>
+<string name="preferencelist_selectimetext">选择输入法</string>
+ 
+<string name="preferencelist_selectdevice">选择设备</string>
+<string name="preferencelist_selectdriver">选择设备驱动</string>
+ 
+<string name="preferencelist_selectdevice_n" formated="false">选择设备 #%s</string>
+<string name="preferencelist_selectdriver_n" formated="false">选择设备驱动 #%s</string>
+<string name="preferencelist_configbuttons_n" formated="false">设置设备按键 #%s</string>
+     
+<string name="preferencelist_configure_keys_short">设置按键映射</string>
+<string name="preferencelist_configure_keys_long">可以设置手柄按键映射的按键</string>
+<string name="preferencelist_autoenabledisable_short">蓝牙管理</string>
+<string name="preferencelist_autoenabledisable_long">自动的开启蓝牙或关闭蓝牙在你需要或不需要的时候</string>
+ 
+<string name="preferencelist_configure_controllers_short">设置控制器数目</string>
+<string name="preferencelist_configure_controllers_long" formated="false">当前活动的控制器数目: %s</string>
+ 
+<string name="preference_help_short">帮助 / 支持 / 更多</string>
+<string name="preference_help_long">http://code.google.com/p/android-bluez-ime/ </string>
+ 
+<string name="preference_wakelock_short">设置屏幕待机</string>
+<string name="preference_wakelock_none">在不使用的时候关闭屏幕 </string>
+<string name="preference_wakelock_full">保持屏幕长亮</string>
+<string name="preference_wakelock_dim">保持屏幕长亮，但是如果长时间不使用则降低屏幕亮度</string>
+     
+<string name="preference_device_unknown">无法识别改设备</string>
+ 
+<string name="preference_use_paypal">用贝宝(paypal)赞助</string>
+ 
+<string name="error_bluetooth_off">蓝牙正在关闭中</string>
+ 
+<string name="settings_title">Bluez IME 设置</string>
+<string name="scan_title">选择Bluez IME 设备 </string>
+<string name="button_config_title">按键设置</string>
+ 
+<string name="ime_starting">Bluez IME 正在运行 ...</string>
+<string name="ime_connecting" formated="false">正在连接: %s ...</string>
+<string name="ime_error" formated="false">错误: %s</string>
+<string name="ime_connected" formated="false">连接到 %s</string>
+<string name="ime_disconnected">当前无连接</string>
+ 
+<string name="configuration_header1">按键设置</string>
+<string name="configuration_header2">重置按键设置</string>
+<string name="configuration_header3">当前使用的按键配置</string>
+ 
+<string name="configuration_select_setup_short">选择列表中保存的按键配置</string>
+<string name="configuration_select_setup_long">选择配置名称</string>
+<string name="configuration_rename_setup_short">重命名配置名称</string>
+<string name="configuration_rename_setup_long">点击重命名配置名称</string>
+ 
+<string name="configuration_reset_short">恢复所有设置到默认</string>
+<string name="configuration_reset_long">点击以便恢复按键映射到默认</string>
+ 
+<string name="configuration_toggle_meta" formated="false">映射 %s</string>
+
+<string name="zeemote_button_a">Button A</string>
+<string name="zeemote_button_b">Button B</string>
+<string name="zeemote_button_c">Button C</string>
+<string name="zeemote_button_d">Button D</string>
+
+<string name="zeemote_axis_left">Thumbstick left</string>
+<string name="zeemote_axis_right">Thumbstick right</string>
+
+<string name="zeemote_axis_up">Thumbstick up</string>
+<string name="zeemote_axis_down">Thumbstick down</string>
+
+
+<string name="bgp100_button_a">Button A</string>
+<string name="bgp100_button_b">Button B</string>
+<string name="bgp100_button_c">Button C</string>
+<string name="bgp100_button_d">Button D</string>
+
+<string name="bgp100_button_l">Button L</string>
+<string name="bgp100_button_r">Button R</string>
+
+<string name="bgp100_button_start">Start Button</string>
+
+<string name="bgp100_dpad_left">Dpad Left</string>
+<string name="bgp100_dpad_right">Dpad Right</string>
+<string name="bgp100_dpad_up">Dpad Up</string>
+<string name="bgp100_dpad_down">Dpad Down</string>
+
+<string name="phonejoy_button_select">Select Button</string>
+<string name="phonejoy_button_l1">Button L1</string>
+<string name="phonejoy_button_r1">Button R1</string>
+<string name="phonejoy_button_l2">Button L2</string>
+<string name="phonejoy_button_r2">Button R2</string>
+
+<string name="phonejoy_analog_left_up">Left analog, Up</string>
+<string name="phonejoy_analog_left_down">Left analog, Down</string>
+<string name="phonejoy_analog_left_left">Left analog, Left</string>
+<string name="phonejoy_analog_left_right">Left analog, Right</string>
+
+<string name="phonejoy_analog_right_up">Right analog, Up</string>
+<string name="phonejoy_analog_right_down">Right analog, Down</string>
+<string name="phonejoy_analog_right_left">Right analog, Left</string>
+<string name="phonejoy_analog_right_right">Right analog, Right</string>
+
+<string name="phonejoy_button_1">Button 1</string>
+<string name="phonejoy_button_2">Button 2</string>
+<string name="phonejoy_button_3">Button 3</string>
+<string name="phonejoy_button_4">Button 4</string>
+
+
+<string name="icp_button_left">Dpad Left</string>
+<string name="icp_button_right">Dpad Right</string>
+<string name="icp_button_up">Dpad Up</string>
+<string name="icp_button_down">Dpad Down</string>
+
+<string name="icp_button_a">Button A</string>
+<string name="icp_button_b">Button B</string>
+<string name="icp_button_x">Button X</string>
+<string name="icp_button_y">Button Y</string>
+
+<string name="icp_button_l">Button L</string>
+<string name="icp_button_r">Button R</string>
+
+<string name="icp_button_start">Start Button</string>
+<string name="icp_button_select">Select Button</string>
+
+<string name="icp_leftnub_up">Left Nub Up</string>
+<string name="icp_leftnub_down">Left Nub Down</string>
+<string name="icp_leftnub_left">Left Nub Left</string>
+<string name="icp_leftnub_right">Left Nub Right</string>
+
+<string name="icp_rightnub_up">Right Nub Up</string>
+<string name="icp_rightnub_down">Right Nub Down</string>
+<string name="icp_rightnub_left">Right Nub Left</string>
+<string name="icp_rightnub_right">Right Nub Right</string>
+
+<string name="preferencelist_donate_short">支持并赞助这个应用!</string>
+<string name="preferencelist_donate_long">点击此处捐助一小笔钱以支持开发者</string>
+ 
+<string name="preferencelist_donate_short_donated">谢谢你的赞助!</string>
+<string name="preferencelist_donate_long_donated">你已经赞助了: %s €</string>
+
+<string name="wiimote_dpad_left">Dpad Left</string>
+<string name="wiimote_dpad_right">Dpad Right</string>
+<string name="wiimote_dpad_up">Dpad Up</string>
+<string name="wiimote_dpad_down">Dpad Down</string>
+
+<string name="wiimote_core_a">Button A</string>
+<string name="wiimote_core_b">Button B</string>
+<string name="wiimote_core_1">Button 1</string>
+<string name="wiimote_core_2">Button 2</string>
+
+<string name="wiimote_plus">Button +</string>
+<string name="wiimote_minus">Button -</string>
+<string name="wiimote_home">Home Button</string>
+
+<string name="wiimote_classic_a">Classic Button A</string>
+<string name="wiimote_classic_b">Classic Button B</string>
+<string name="wiimote_classic_x">Classic Button X</string>
+<string name="wiimote_classic_y">Classic Button Y</string>
+
+<string name="wiimote_classic_l1">Classic Button L1</string>
+<string name="wiimote_classic_r1">Classic Button R1</string>
+<string name="wiimote_classic_l2">Classic Button L2</string>
+<string name="wiimote_classic_r2">Classic Button R2</string>
+
+<string name="wiimote_thumb1_left">Left Thumbstick Left</string>
+<string name="wiimote_thumb1_right">Left Thumbstick Right</string>
+<string name="wiimote_thumb1_up">Left Thumbstick Up</string>
+<string name="wiimote_thumb1_down">Left Thumbstick Down</string>
+
+<string name="wiimote_thumb2_left">Right Thumbstick Left</string>
+<string name="wiimote_thumb2_right">Right Thumbstick Right</string>
+<string name="wiimote_thumb2_up">Right Thumbstick Up</string>
+<string name="wiimote_thumb2_down">Right Thumbstick Down</string>
+
+<string name="wiimote_nunchuck_c">Nunchuck Button C</string>
+<string name="wiimote_nunchuck_z">Nunchuck Button Z</string>
+
+<string name="icade_button_a">Top row, button 1 (red)</string>
+<string name="icade_button_b">Top row, button 2 (black)</string>
+<string name="icade_button_c">Top row, button 3 (black)</string>
+<string name="icade_button_d">Top row, button 4 (white)</string>
+
+<string name="icade_button_x">Bottom row, button 1 (red)</string>
+<string name="icade_button_y">Bottom row, button 2 (black)</string>
+<string name="icade_button_z">Bottom row, button 3 (black)</string>
+<string name="icade_button_w">Bottom row, button 4 (white)</string>
+    
+<string name="icade_stick_left">Stick left</string>
+<string name="icade_stick_right">Stick right</string>
+
+<string name="icade_stick_up">Stick up</string>
+<string name="icade_stick_down">Stick down</string>
+</resources>
