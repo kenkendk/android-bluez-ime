@@ -98,16 +98,30 @@
 
 <string name="configuration_toggle_meta" formated="false">Toggle %s</string>
     
-<string name="zeemote_button_a">Button A</string>
-<string name="zeemote_button_b">Button B</string>
-<string name="zeemote_button_c">Button C</string>
-<string name="zeemote_button_d">Button D</string>
+<string name="zeemote_button_a">Button A (1)</string>
+<string name="zeemote_button_b">Button B (2)</string>
+<string name="zeemote_button_c">Button C (3)</string>
+<string name="zeemote_button_d">Button D (4)</string>
 
-<string name="zeemote_axis_left">Thumbstick left</string>
-<string name="zeemote_axis_right">Thumbstick right</string>
+<string name="zeemote_axis_left">(left) Thumbstick left</string>
+<string name="zeemote_axis_right">(left) Thumbstick right</string>
+<string name="zeemote_axis_up">(left) Thumbstick up</string>
+<string name="zeemote_axis_down">(left) Thumbstick down</string>
 
-<string name="zeemote_axis_up">Thumbstick up</string>
-<string name="zeemote_axis_down">Thumbstick down</string>
+<string name="zeemote_rightaxis_left">(right) Thumbstick left</string>
+<string name="zeemote_rightaxis_right">(right) Thumbstick right</string>
+<string name="zeemote_rightaxis_up">(right) Thumbstick up</string>
+<string name="zeemote_rightaxis_down">(right) Thumbstick down</string>
+
+<string name="zeemote_button_l">Button L</string>
+<string name="zeemote_button_r">Button R</string>
+<string name="zeemote_button_newa">Button A (start)</string>
+<string name="zeemote_button_newb">Button B (select)</string>
+
+<string name="zeemote_dpad_up">DPAD Up</string>
+<string name="zeemote_dpad_down">DPAD Down</string>
+<string name="zeemote_dpad_left">DPAD Left</string>
+<string name="zeemote_dpad_right">DPAD Right</string>
 
 
 <string name="bgp100_button_a">Button A</string>
