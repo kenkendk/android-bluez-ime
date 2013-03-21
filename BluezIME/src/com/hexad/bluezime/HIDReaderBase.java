@@ -49,6 +49,20 @@ public abstract class HIDReaderBase extends RfcommReader {
 	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
 		
 		boolean isSecure = false;
+
+		if (m_controlSocket != null) {
+			if (D) Log.d(LOG_NAME, "Closing control socket on retry, " + m_controlSocket);
+			try { m_controlSocket.close(); }
+			catch (Exception ex) { }
+			finally { m_controlSocket = null; }
+		}
+
+		if (m_socket != null) {
+			if (D) Log.d(LOG_NAME, "Closing data socket on retry, " + m_socket);
+			try { m_socket.close(); }
+			catch (Exception ex) { }
+			finally { m_socket = null; }
+		}
 		
 		if (!m_useInsecureChannel) {
 			try {

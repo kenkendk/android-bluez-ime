@@ -153,7 +153,21 @@ public abstract class RfcommReader implements BluezDriverInterface {
 	}
 	
 	protected int setupConnection(ImprovedBluetoothDevice device, byte[] readBuffer) throws Exception {
-        m_socket = m_useInsecureChannel ? device.createInsecureRfcommSocket(1) : device.createRfcommSocket(1);
+		if (m_input != null) {
+			if (D) Log.d(LOG_NAME, "Closing input stream on retry, " + m_input);
+			try { m_input.close(); }
+			catch (Exception ex) {}
+			finally { m_input = null; }
+		}
+		
+		if (m_socket != null) {
+			if (D) Log.d(LOG_NAME, "Closing socket on retry, " + m_socket);
+			try { m_socket.close(); }
+			catch (Exception ex) {}
+			finally { m_socket = null; }
+		}
+		
+		m_socket = m_useInsecureChannel ? device.createInsecureRfcommSocket(1) : device.createRfcommSocket(1);
         m_socket.connect();
 
         if (D) Log.d(LOG_NAME, "Connected to " + m_address);
