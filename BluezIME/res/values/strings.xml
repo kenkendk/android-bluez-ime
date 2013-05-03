@@ -246,6 +246,35 @@
 
 <string name="icade_stick_up">Stick up</string>
 <string name="icade_stick_down">Stick down</string>
-    
+
+<string name="gamestop_button_1">Button 1</string>
+<string name="gamestop_button_2">Button 2</string>
+<string name="gamestop_button_3">Button 3</string>
+<string name="gamestop_button_4">Button 4</string>
+
+<string name="gamestop_dpad_up">DPAD Up</string>
+<string name="gamestop_dpad_down">DPAD Down</string>
+<string name="gamestop_dpad_left">DPAD Left</string>
+<string name="gamestop_dpad_right">DPAD Right</string>
+
+<string name="gamestop_button_l1">L1</string>
+<string name="gamestop_button_l2">L2</string>
+<string name="gamestop_button_r1">R1</string>
+<string name="gamestop_button_r2">R2</string>
+
+<string name="gamestop_button_start">Start Button</string>
+<string name="gamestop_button_select">Select Button</string>
+<string name="gamestop_button_l3">L3</string>
+<string name="gamestop_button_r3">R3</string>
+
+<string name="gamestop_leftknob_left">Left Analog stick - Left</string>
+<string name="gamestop_leftknob_right">Left Analog stick - Right</string>
+<string name="gamestop_leftknob_up">Left Analog stick - Up</string>
+<string name="gamestop_leftknob_down">Left Analog stick - Down</string>
+
+<string name="gamestop_rightknob_left">Right Analog stick - Left</string>
+<string name="gamestop_rightknob_right">Right Analog stick - Right</string>
+<string name="gamestop_rightknob_up">Right Analog stick - Up</string>
+<string name="gamestop_rightknob_down">Right Analog stick - Down</string>
 
 </resources>
