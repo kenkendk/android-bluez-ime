@@ -37,6 +37,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DRIVER_NAME, 
 		PhonejoyReader.DRIVER_NAME,
 		iControlPadReader.DRIVER_NAME,
+		GameStopReader.DRIVER_NAME,
 		DataDumpReader.DRIVER_NAME
 	};
 	
@@ -45,6 +46,7 @@ public class BluezService extends IntentService {
 		BGP100Reader.DISPLAY_NAME, 
 		PhonejoyReader.DISPLAY_NAME,
 		iControlPadReader.DISPLAY_NAME,
+		GameStopReader.DISPLAY_NAME,
 		DataDumpReader.DISPLAY_NAME
 	};
 	
@@ -337,6 +339,8 @@ public class BluezService extends IntentService {
 					reader = new HIDKeyboard(address, sessionId, getApplicationContext(), startnotification);
 				else if (driver.toLowerCase().equals(iCadeReader.DRIVER_NAME.toLowerCase()))
 					reader = new iCadeReader(address, sessionId, getApplicationContext(), startnotification);
+				else if (driver.toLowerCase().equals(GameStopReader.DRIVER_NAME.toLowerCase()))
+					reader = new GameStopReader(address, sessionId, getApplicationContext(), startnotification);
 				else
 					throw new Exception(String.format(this.getString(R.string.invalid_driver), driver));
 				
