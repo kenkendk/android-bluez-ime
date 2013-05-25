@@ -12,7 +12,7 @@ public class GameStopReader extends RfcommReader {
 	private static final boolean D = false;
 	
 	public static final String DRIVER_NAME = "gamestop";
-	public static final String DISPLAY_NAME = "GameStop Controller";
+	public static final String DISPLAY_NAME = "GameStop Red Samurai Controller";
 	
 	private final byte MAGIC_NUMBER = (byte)0xA1;
 	private final byte MAGIC_NUMBER_MESSAGE = (byte)0x01;
