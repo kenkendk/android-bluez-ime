@@ -26,7 +26,7 @@ import android.view.KeyEvent;
 
 public class WiimoteReader extends HIDReaderBase {
 
-	private static final boolean D = false; //General debug info
+	private static final boolean D = true; //General debug info
 	private static final boolean D2 = false; //Detailed (packages) debug info
 	private static final boolean D3 = false; //Classic Controller debug info
 	
@@ -283,7 +283,76 @@ public class WiimoteReader extends HIDReaderBase {
 	private byte m_updateRequestLEDState = m_LEDstate;
 	private boolean m_updateRequestAccelerometer = m_useAccelerometer;
 	
+	//A control for calibration data state
+	private final int CALIBRATION_DATA_NOT_REQUESTED = 0;
+	private final int CALIBRATION_DATA_REQUESTED = 1;
+	private final int CALIBRATION_DATA_RECEIVED = 2;
+	
+	private final int MAX_CALIBRATION_REQUESTS = 10;
+	
+	private int m_calibrationDataState = CALIBRATION_DATA_NOT_REQUESTED;
+	private int m_calibrationRequestAttempts = 0;
+
+	private static class NunchuckCalibrationDataAxis {
+		private static final int MAX_LEVEL = 120;
+		
+		public int min;
+		public int max;
+		public int center;
+		
+		public void ResetAsX()
+		{
+			//X has 8 bits, but use [35-128-228]
+			min = 35;
+			center = 128;
+			max = 228;
+		}
+
+		public void ResetAsY()
+		{
+			//Y has 8 bits, but use [27-128-220]
+			min = 27;
+			center = 128;
+			max = 220;
+		}
+		
+		public int NormalizedValue(int raw) {
+			if (raw == center) {
+				return 0;
+			} else if (raw < center) {
+				int retVal = (int)((((raw - min) / (float)(center - min)) * 127) - 127);
+				if (retVal < -MAX_LEVEL)
+				{
+					if (D) Log.d(DRIVER_NAME, "Nunchuck going to -127 from: " + retVal);
+					retVal = -127;
+				}
+				return retVal;
+			} else {
+				int retVal = (int)(((raw - center) / (float)(max - center)) * 127);
+				if (retVal > MAX_LEVEL)
+				{
+					if (D) Log.d(DRIVER_NAME, "Nunchuck going to 127 from: " + retVal);
+					retVal = 127;
+				}
+				return retVal;
+			}
+		}
+	}
+
+	private static class NunchuckCalibrationDataStick {
+		public final NunchuckCalibrationDataAxis x = new NunchuckCalibrationDataAxis();
+		public final NunchuckCalibrationDataAxis y = new NunchuckCalibrationDataAxis();
+		
+		public void Reset()
+		{
+			x.ResetAsX();
+			y.ResetAsY();
+		}
+	}
+	
 	private static class ClassicCalibrationDataAxis {
+		private static final int MAX_LEVEL = 120;
+
 		public int min;
 		public int max;
 		public int center;
@@ -314,9 +383,21 @@ public class WiimoteReader extends HIDReaderBase {
 			if (raw == center) {
 				return 0;
 			} else if (raw < center) {
-				return ((byte)(((raw - min) / (float)(center - min)) * 127)) - 127;
+				int retVal = (int)((((raw - min) / (float)(center - min)) * 127) - 127);
+				if (retVal < -MAX_LEVEL)
+				{
+					if (D) Log.d(DRIVER_NAME, "Classic Controller going to -127 from: " + retVal);
+					retVal = -127;
+				}
+				return retVal;
 			} else {
-				return (byte)(((raw - center) / (float)(max - center)) * 127);
+				int retVal = (int)(((raw - center) / (float)(max - center)) * 127);
+				if (retVal > MAX_LEVEL)
+				{
+					if (D) Log.d(DRIVER_NAME, "Classic Controller going to 127 from: " + retVal);
+					retVal = 127;
+				}
+				return retVal;
 			}
 		}
 	}
@@ -351,6 +432,7 @@ public class WiimoteReader extends HIDReaderBase {
 	
 	private final ClassicCalibrationDataStick m_classic_calibration_left = new ClassicCalibrationDataStick(true);
 	private final ClassicCalibrationDataStick m_classic_calibration_right = new ClassicCalibrationDataStick(false);
+    private final NunchuckCalibrationDataStick m_nunchuck_calibration = new NunchuckCalibrationDataStick();
 	
 	//We keep a copy to prevent repeated allocations
 	private Hashtable<Byte, Integer> m_reportCodes = null;
@@ -401,12 +483,9 @@ public class WiimoteReader extends HIDReaderBase {
 		//When this is called, we are connected, 
 		// so we set up the current state
 		
-		//Bugfix, there seems to be some cases where the controller does not respond immediately
-		try { Thread.sleep(500); }
-		catch (InterruptedException iex) {}
-		
-		//Set the LEDs to indicate we are now connected
-		setLEDs(true, false, false, false);
+		//Request that the first LED is on
+		m_LEDstate = 0x0;
+		request_SetLEDState(true, false, false, false); 
 		
 		//Set the report mode
 		updateReportMode();
@@ -433,7 +512,7 @@ public class WiimoteReader extends HIDReaderBase {
 					break;
 			}
 		}
-		
+				
 		switch(reportId) {
 			case (byte)0x20: //Status report
 				handleStatusReport(data[2], data[5]);
@@ -479,50 +558,81 @@ public class WiimoteReader extends HIDReaderBase {
 				break;
 		}
 
+		
 		//If we have not yet seen an extension, lets force activation
-		if (m_probeExtension == EXTENSION_PROBETHRESHOLD && !(m_isClassicConnected || m_isNunchuckConnected)) {
+		if (m_probeExtension <= EXTENSION_PROBETHRESHOLD && !(m_isClassicConnected || m_isNunchuckConnected)) {
 			if (D) Log.d(DRIVER_NAME, "Probing for extensions");
 			//These will activate the extension without encryption
 			writeExtensionRegister((byte)0xf0, (byte)0x55);
 			m_extensionInitState = EXTENSION_INIT_STATE_SENT_FIRST;
-		}
-
-		//Count until we hit the threshold
-		if (m_probeExtension <= EXTENSION_PROBETHRESHOLD)
 			m_probeExtension++;
-
+		} else if (m_calibrationDataState != CALIBRATION_DATA_RECEIVED && (m_isClassicConnected || m_isNunchuckConnected)) {
+			//If no other requests are sent, send the calibration request again
+			requestCalibrationData();
+		}
+		
 		//We only call the synchronized method when the flag is set
 		//which reduces the number of times we need to obtain the lock
-		if (m_dirtyUpdateFlag)
-			processUpdateRequest();
+		if (m_dirtyUpdateFlag) 
+			processUpdateRequest();		
 	}
 
 	private void handleExtensionDataRead(int offset, byte size, byte[] data) throws IOException {
 		
-		//Special report, read calibration data from classic controller
+		//Special report, read calibration data
 		if (offset == 0x0020) {
 			
-			if (D || D3) Log.d(DRIVER_NAME, "Got classic controller calibration report: " + getHexString(data, 0, data.length));
+			if (D || D3) Log.d(DRIVER_NAME, "Got calibration report: " + getHexString(data, 0, data.length));
 
-			//TODO: The Nunchuck can also deliver calibration data
-			if ((data[0] & 0xff) != 0xff && data[0] != 0x00 && size >= 12 && m_isClassicConnected) {
-				if (D || D3) Log.d(DRIVER_NAME, "Classic controller calibration data seems valid, setting up ranges");
+			if (m_isClassicConnected && size >= 12) {
+				if ((data[0] & 0xff) == 0xff || data[0] != 0x00) {
+					if (D || D3) Log.d(DRIVER_NAME, "Classic controller calibration data was not valid requesting again");
+					requestCalibrationData();
+					
+				} else {
+					if (D || D3) Log.d(DRIVER_NAME, "Classic controller calibration data seems valid, setting up ranges");
+					m_calibrationDataState = CALIBRATION_DATA_RECEIVED;
+	
+					m_classic_calibration_left.x.max = data[0] / 4;
+					m_classic_calibration_left.x.min = data[1] / 4;
+					m_classic_calibration_left.x.center = data[2] / 4;
+					m_classic_calibration_left.y.max = data[3] / 4;
+					m_classic_calibration_left.y.min = data[4] / 4;
+					m_classic_calibration_left.y.center = data[5] / 4;
+	
+					m_classic_calibration_left.x.max = data[6] / 8;
+					m_classic_calibration_left.x.min = data[7] / 8;
+					m_classic_calibration_left.x.center = data[8] / 8;
+					m_classic_calibration_left.y.max = data[9] / 8;
+					m_classic_calibration_left.y.min = data[10] / 8;
+					m_classic_calibration_left.y.center = data[11] / 8;
+				}
+			} else if (m_isNunchuckConnected && size >= 14)	{
+				if ((data[0] & 0xff) == 0xff || data[0] != 0x00) {
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration data was not valid requesting again");
+					requestCalibrationData();
+					
+				} else {
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration data seems valid, setting up ranges");
+					m_calibrationDataState = CALIBRATION_DATA_RECEIVED;
+					
+					m_nunchuck_calibration.x.max = data[8] & 0xff;
+					m_nunchuck_calibration.x.min = data[9] & 0xff;
+					m_nunchuck_calibration.x.center = data[10] & 0xff;
+					m_nunchuck_calibration.y.max = data[11] & 0xff;
+					m_nunchuck_calibration.y.min = data[12] & 0xff;
+					m_nunchuck_calibration.y.center = data[13] & 0xff;
+					
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration x max: " + m_nunchuck_calibration.x.max);
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration x min: " + m_nunchuck_calibration.x.min);
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration x center: " + m_nunchuck_calibration.x.center);
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration y max: " + m_nunchuck_calibration.y.max);
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration y min: " + m_nunchuck_calibration.y.min);
+					if (D || D3) Log.d(DRIVER_NAME, "Nunchuck calibration y center: " + m_nunchuck_calibration.y.center);
 
-				m_classic_calibration_left.x.max = data[0] / 4;
-				m_classic_calibration_left.x.min = data[1] / 4;
-				m_classic_calibration_left.x.center = data[2] / 4;
-				m_classic_calibration_left.y.max = data[3] / 4;
-				m_classic_calibration_left.y.min = data[4] / 4;
-				m_classic_calibration_left.y.center = data[5] / 4;
-
-				m_classic_calibration_left.x.max = data[6] / 8;
-				m_classic_calibration_left.x.min = data[7] / 8;
-				m_classic_calibration_left.x.center = data[8] / 8;
-				m_classic_calibration_left.y.max = data[9] / 8;
-				m_classic_calibration_left.y.min = data[10] / 8;
-				m_classic_calibration_left.y.center = data[11] / 8;
+				}
 			} else {
-				if (D || D3) Log.d(DRIVER_NAME, "Classic Controller calibration data was not valid ignoring");
+				if (D || D3) Log.d(DRIVER_NAME, "Calibration data was not valid ignoring");
 			}
 		} else	if (offset != 0x00fa || size != CLASSIC_DEVICE_ID.length) {
 			Log.e(DRIVER_NAME, "Unexpected data read: " + getHexString(data, 0, size));
@@ -564,10 +674,9 @@ public class WiimoteReader extends HIDReaderBase {
 				m_classic_calibration_left.Reset();
 				m_classic_calibration_right.Reset();
 				
-				//Ask for calibration data, if we do not get it, we just use the default data
-				if (D || D3) Log.d(DRIVER_NAME, "Sending Classic Controller Calibration data request");
-				readExtensionRegisters((byte)0x20, (byte)16);
-				
+				m_calibrationRequestAttempts = 0;
+				m_calibrationDataState = CALIBRATION_DATA_NOT_REQUESTED;
+				requestCalibrationData();
 				updateReportMode();
 			} else if (nunchuck | nunchuck_alt) {
 				if (D) Log.d(DRIVER_NAME, "Wii Nunchuck Controller Extension connected");
@@ -585,10 +694,27 @@ public class WiimoteReader extends HIDReaderBase {
 					m_nunchuckEmulatedButtons[i] = false;
 
 				m_isNunchuckConnected = true;
+				m_nunchuck_calibration.Reset();
+
+				m_calibrationRequestAttempts = 0;
+				m_calibrationDataState = CALIBRATION_DATA_NOT_REQUESTED;
+				requestCalibrationData();
 				updateReportMode();
 			} else {
 				Log.d(DRIVER_NAME, "Unknown extension device id: " + getHexString(data, 0, size));
 			}
+		}
+	}
+	
+	private void requestCalibrationData() throws IOException {
+		
+		if (m_isClassicConnected || m_isNunchuckConnected && m_calibrationRequestAttempts < MAX_CALIBRATION_REQUESTS && m_calibrationDataState != CALIBRATION_DATA_RECEIVED) {
+
+			//Ask for calibration data
+			m_calibrationRequestAttempts++;
+			m_calibrationDataState = CALIBRATION_DATA_REQUESTED;
+			if (D || D3) Log.d(DRIVER_NAME, "Sending calibration data request");
+			readExtensionRegisters((byte)0x20, (byte)16);
 		}
 	}
 	
@@ -641,6 +767,7 @@ public class WiimoteReader extends HIDReaderBase {
 		}
 	}
 	
+	@SuppressWarnings("unused")
 	private void setLEDs(boolean l1, boolean l2, boolean l3, boolean l4) throws Exception {
 		m_LEDstate = (byte)
 			((l1 ? 0x10 : 0x00) |
@@ -773,6 +900,8 @@ public class WiimoteReader extends HIDReaderBase {
 				
 				m_isClassicConnected = false;
 				m_isNunchuckConnected = false;
+				m_calibrationDataState = CALIBRATION_DATA_NOT_REQUESTED;
+				m_calibrationRequestAttempts = 0;
 				
 				//Disable extension data
 				updateReportMode();
@@ -975,8 +1104,8 @@ public class WiimoteReader extends HIDReaderBase {
 			m_tmpAnalogValues[1] = (((int)data[offset + 1]) & 0xff); //Thumbstick left/right
 			
 			//We scale the values so they are all in the -127/+127 range
-			m_tmpAnalogValues[0] = (int)((m_tmpAnalogValues[0] - 0x78) * 1.27);
-			m_tmpAnalogValues[1] = (int)((m_tmpAnalogValues[1] - 0x81) * 1.3);
+			m_tmpAnalogValues[0] = m_nunchuck_calibration.x.NormalizedValue(m_tmpAnalogValues[0]);
+			m_tmpAnalogValues[1] = m_nunchuck_calibration.y.NormalizedValue(m_tmpAnalogValues[1]);
 			
 			//Bugfix, invert the Y-axis values:
 			m_tmpAnalogValues[1] *= -1;
