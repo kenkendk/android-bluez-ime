@@ -115,7 +115,7 @@ public class GameStopReader extends RfcommReader {
 				_directionValues[3] = (data[offset + 5] & 0xff) - 0x80;
 				
 				for(int i = 0; i < m_buttons.length; i++) {
-					boolean state =  (buttons & (1 << i)) != 0;
+					boolean state =  (buttons & (1 << (15 - i))) != 0;
 					if (state != m_buttons[i]) {
 						m_buttons[i] = state;
 						keypressBroadcast.putExtra(BluezService.EVENT_KEYPRESS_ACTION, state ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP);
