@@ -277,4 +277,28 @@
 <string name="gamestop_rightknob_up">Right Analog stick - Up</string>
 <string name="gamestop_rightknob_down">Right Analog stick - Down</string>
 
+<string name="ipega_dpad_up">DPAD Up</string>
+<string name="ipega_dpad_down">DPAD Down</string>
+<string name="ipega_dpad_left">DPAD Left</string>
+<string name="ipega_dpad_right">DPAD Right</string>
+
+<string name="ipega_button_a">Button A</string>
+<string name="ipega_button_b">Button B</string>
+<string name="ipega_button_x">Button X</string>
+<string name="ipega_button_y">Button Y</string>
+<string name="ipega_button_start">Start Button</string>
+<string name="ipega_button_select">Select Button</string>
+<string name="ipega_button_l1">Button L</string>
+<string name="ipega_button_r1">Button R</string>
+
+<string name="ipega_left_stick_left">Left Analog stick - Left</string>
+<string name="ipega_left_stick_right">Left Analog stick - right</string>
+<string name="ipega_left_stick_up">Left Analog stick - Up</string>
+<string name="ipega_left_stick_down">Left Analog stick - Down</string>
+<string name="ipega_right_stick_left">Right Analog stick - Left</string>
+<string name="ipega_right_stick_right">Right Analog stick - right</string>
+<string name="ipega_right_stick_up">Right Analog stick - Up</string>
+<string name="ipega_right_stick_down">Right Analog stick - Down</string>
+
+
 </resources>
