@@ -136,6 +136,9 @@ public class ButtonConfiguration extends PreferenceActivity {
         } else if (driver.equals(GameStopReader.DRIVER_NAME)) {
             buttonCodes = GameStopReader.getButtonCodes();
             buttonNames = GameStopReader.getButtonNames();
+        } else if (driver.equals(HIDipega.DRIVER_NAME)) {
+            buttonCodes = HIDipega.getButtonCodes();
+            buttonNames = HIDipega.getButtonNames();
 		} else if (driver.equals(HIDKeyboard.DRIVER_NAME)) {
 			//TODO: Figure out what the display should look like
 			buttonCodes = new int[0];
