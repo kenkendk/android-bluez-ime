@@ -32,7 +32,7 @@ public class HIDipega extends HIDReaderBase {
         4,		//down			bit 0000100
         12,		//down-left		bit 0001100
         8,		//left			bit 0001000
-        24		//left-up		bit 0011000
+        9		//left-up		bit 0001001
     };
 	
 	private static final int[] KEYS = new int[] {
